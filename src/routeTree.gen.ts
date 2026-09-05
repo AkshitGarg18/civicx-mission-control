@@ -11,12 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccessRouteImport } from './routes/access'
-import { Route as CitizenRouteImport } from './routes/citizen'
-import { Route as GovernmentRouteImport } from './routes/government'
-import { Route as IndustryRouteImport } from './routes/industry'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as UniversityRouteImport } from './routes/university'
+import { Route as AuthenticatedCitizenRouteImport } from './routes/_authenticated/citizen'
+import { Route as AuthenticatedGovernmentRouteImport } from './routes/_authenticated/government'
+import { Route as AuthenticatedIndustryRouteImport } from './routes/_authenticated/industry'
+import { Route as AuthenticatedUniversityRouteImport } from './routes/_authenticated/university'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -26,21 +26,6 @@ const IndexRoute = IndexRouteImport.update({
 const AccessRoute = AccessRouteImport.update({
   id: '/access',
   path: '/access',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CitizenRoute = CitizenRouteImport.update({
-  id: '/citizen',
-  path: '/citizen',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GovernmentRoute = GovernmentRouteImport.update({
-  id: '/government',
-  path: '/government',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndustryRoute = IndustryRouteImport.update({
-  id: '/industry',
-  path: '/industry',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -53,8 +38,23 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UniversityRoute = UniversityRouteImport.update({
-  id: '/university',
+const AuthenticatedCitizenRoute = AuthenticatedCitizenRouteImport.update({
+  id: '/_authenticated/citizen',
+  path: '/citizen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedGovernmentRoute = AuthenticatedGovernmentRouteImport.update({
+  id: '/_authenticated/government',
+  path: '/government',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndustryRoute = AuthenticatedIndustryRouteImport.update({
+  id: '/_authenticated/industry',
+  path: '/industry',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedUniversityRoute = AuthenticatedUniversityRouteImport.update({
+  id: '/_authenticated/university',
   path: '/university',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -62,76 +62,76 @@ const UniversityRoute = UniversityRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/access': typeof AccessRoute
-  '/citizen': typeof CitizenRoute
-  '/government': typeof GovernmentRoute
-  '/industry': typeof IndustryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
-  '/university': typeof UniversityRoute
+  '/citizen': typeof AuthenticatedCitizenRoute
+  '/government': typeof AuthenticatedGovernmentRoute
+  '/industry': typeof AuthenticatedIndustryRoute
+  '/university': typeof AuthenticatedUniversityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/access': typeof AccessRoute
-  '/citizen': typeof CitizenRoute
-  '/government': typeof GovernmentRoute
-  '/industry': typeof IndustryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
-  '/university': typeof UniversityRoute
+  '/citizen': typeof AuthenticatedCitizenRoute
+  '/government': typeof AuthenticatedGovernmentRoute
+  '/industry': typeof AuthenticatedIndustryRoute
+  '/university': typeof AuthenticatedUniversityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/access': typeof AccessRoute
-  '/citizen': typeof CitizenRoute
-  '/government': typeof GovernmentRoute
-  '/industry': typeof IndustryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
-  '/university': typeof UniversityRoute
+  '/_authenticated/citizen': typeof AuthenticatedCitizenRoute
+  '/_authenticated/government': typeof AuthenticatedGovernmentRoute
+  '/_authenticated/industry': typeof AuthenticatedIndustryRoute
+  '/_authenticated/university': typeof AuthenticatedUniversityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/access'
+    | '/login'
+    | '/signup'
     | '/citizen'
     | '/government'
     | '/industry'
-    | '/login'
-    | '/signup'
     | '/university'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/access'
+    | '/login'
+    | '/signup'
     | '/citizen'
     | '/government'
     | '/industry'
-    | '/login'
-    | '/signup'
     | '/university'
   id:
     | '__root__'
     | '/'
     | '/access'
-    | '/citizen'
-    | '/government'
-    | '/industry'
     | '/login'
     | '/signup'
-    | '/university'
+    | '/_authenticated/citizen'
+    | '/_authenticated/government'
+    | '/_authenticated/industry'
+    | '/_authenticated/university'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccessRoute: typeof AccessRoute
-  CitizenRoute: typeof CitizenRoute
-  GovernmentRoute: typeof GovernmentRoute
-  IndustryRoute: typeof IndustryRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
-  UniversityRoute: typeof UniversityRoute
+  AuthenticatedCitizenRoute: typeof AuthenticatedCitizenRoute
+  AuthenticatedGovernmentRoute: typeof AuthenticatedGovernmentRoute
+  AuthenticatedIndustryRoute: typeof AuthenticatedIndustryRoute
+  AuthenticatedUniversityRoute: typeof AuthenticatedUniversityRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -150,27 +150,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccessRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/citizen': {
-      id: '/citizen'
-      path: '/citizen'
-      fullPath: '/citizen'
-      preLoaderRoute: typeof CitizenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/government': {
-      id: '/government'
-      path: '/government'
-      fullPath: '/government'
-      preLoaderRoute: typeof GovernmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/industry': {
-      id: '/industry'
-      path: '/industry'
-      fullPath: '/industry'
-      preLoaderRoute: typeof IndustryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -185,11 +164,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/university': {
-      id: '/university'
+    '/_authenticated/citizen': {
+      id: '/_authenticated/citizen'
+      path: '/citizen'
+      fullPath: '/citizen'
+      preLoaderRoute: typeof AuthenticatedCitizenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/government': {
+      id: '/_authenticated/government'
+      path: '/government'
+      fullPath: '/government'
+      preLoaderRoute: typeof AuthenticatedGovernmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/industry': {
+      id: '/_authenticated/industry'
+      path: '/industry'
+      fullPath: '/industry'
+      preLoaderRoute: typeof AuthenticatedIndustryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/university': {
+      id: '/_authenticated/university'
       path: '/university'
       fullPath: '/university'
-      preLoaderRoute: typeof UniversityRouteImport
+      preLoaderRoute: typeof AuthenticatedUniversityRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -198,12 +198,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccessRoute: AccessRoute,
-  CitizenRoute: CitizenRoute,
-  GovernmentRoute: GovernmentRoute,
-  IndustryRoute: IndustryRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
-  UniversityRoute: UniversityRoute,
+  AuthenticatedCitizenRoute: AuthenticatedCitizenRoute,
+  AuthenticatedGovernmentRoute: AuthenticatedGovernmentRoute,
+  AuthenticatedIndustryRoute: AuthenticatedIndustryRoute,
+  AuthenticatedUniversityRoute: AuthenticatedUniversityRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

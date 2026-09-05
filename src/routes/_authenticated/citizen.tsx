@@ -6,7 +6,7 @@ const title = "Citizen Mission Control | CivicX";
 const description =
   "Report civic challenges, track how your reports progress through AI analysis and university matching, and see the impact you create in your community.";
 
-export const Route = createFileRoute("/citizen")({
+export const Route = createFileRoute("/_authenticated/citizen")({
   head: () => ({
     meta: [
       { title },

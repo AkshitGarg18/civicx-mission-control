@@ -6,7 +6,7 @@ const title = "Industry Console — Accelerate Solutions | CivicX";
 const description =
   "The CivicX industry console: find promising solutions and accelerate them with mentorship, technology, resources and funding.";
 
-export const Route = createFileRoute("/industry")({
+export const Route = createFileRoute("/_authenticated/industry")({
   head: () => ({
     meta: [
       { title },

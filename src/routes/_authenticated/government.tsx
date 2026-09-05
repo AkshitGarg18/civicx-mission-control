@@ -6,7 +6,7 @@ const title = "Government Console — Monitor & Measure Impact | CivicX";
 const description =
   "The CivicX government console: monitor societal challenges, coordinate stakeholders and measure verified real-world impact.";
 
-export const Route = createFileRoute("/government")({
+export const Route = createFileRoute("/_authenticated/government")({
   head: () => ({
     meta: [
       { title },

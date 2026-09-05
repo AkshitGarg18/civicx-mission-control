@@ -6,7 +6,7 @@ const title = "University Console — Build Solution Teams | CivicX";
 const description =
   "The CivicX university console: discover challenges matched to your students' expertise and build teams that ship real solutions.";
 
-export const Route = createFileRoute("/university")({
+export const Route = createFileRoute("/_authenticated/university")({
   head: () => ({
     meta: [
       { title },
