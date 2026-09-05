@@ -26,7 +26,9 @@ export function CitizenDashboard() {
     <div className="relative min-h-screen">
       <CitizenSidebar active={active} onNavigate={navigate} />
 
-      <main className="mx-auto w-full max-w-6xl space-y-16 px-4 py-8 sm:px-6 lg:py-12 lg:pl-8">
+      <div className="lg:pl-64">
+      <main className="mx-auto w-full max-w-6xl space-y-16 px-4 py-8 sm:px-6 lg:py-12">
+
         <CitizenHeader />
         <CivicStatus />
         <ReportSignal onOpen={() => setReportOpen(true)} />
