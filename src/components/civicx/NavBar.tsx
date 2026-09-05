@@ -8,7 +8,7 @@ const links = [
   { label: "How It Works", href: "#how-it-works" },
   { label: "Impact", href: "#impact" },
   { label: "For Universities", href: "#forces" },
-  { label: "For Industry", href: "#forces" },
+  { label: "For Industry", href: "#missions" },
 ];
 
 export function NavBar() {
@@ -25,7 +25,7 @@ export function NavBar() {
 
   // highlight the nav item for the section currently in view
   useEffect(() => {
-    const ids = ["top", "live-world", "how-it-works", "impact", "forces"];
+    const ids = ["top", "live-world", "impact", "how-it-works", "forces", "missions"];
     const sections = ids
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
