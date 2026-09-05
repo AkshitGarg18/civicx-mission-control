@@ -4,7 +4,7 @@ import { Reveal, SectionLabel } from "./Reveal";
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="relative scroll-mt-28 px-4 py-20 sm:px-6 lg:py-28">
+    <section id="how-it-works" className="relative scroll-mt-32 px-4 py-24 sm:px-6 lg:py-32">
       <div className="mx-auto max-w-7xl">
         <Reveal className="max-w-2xl">
           <SectionLabel>Lifecycle</SectionLabel>
