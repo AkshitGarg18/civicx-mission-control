@@ -14,6 +14,7 @@ import { Route as AccessRouteImport } from './routes/access'
 import { Route as CitizenRouteImport } from './routes/citizen'
 import { Route as GovernmentRouteImport } from './routes/government'
 import { Route as IndustryRouteImport } from './routes/industry'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as UniversityRouteImport } from './routes/university'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +42,11 @@ const IndustryRoute = IndustryRouteImport.update({
   path: '/industry',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UniversityRoute = UniversityRouteImport.update({
   id: '/university',
   path: '/university',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/citizen': typeof CitizenRoute
   '/government': typeof GovernmentRoute
   '/industry': typeof IndustryRoute
+  '/login': typeof LoginRoute
   '/university': typeof UniversityRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/citizen': typeof CitizenRoute
   '/government': typeof GovernmentRoute
   '/industry': typeof IndustryRoute
+  '/login': typeof LoginRoute
   '/university': typeof UniversityRoute
 }
 export interface FileRoutesById {
@@ -70,14 +78,28 @@ export interface FileRoutesById {
   '/citizen': typeof CitizenRoute
   '/government': typeof GovernmentRoute
   '/industry': typeof IndustryRoute
+  '/login': typeof LoginRoute
   '/university': typeof UniversityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/access' | '/citizen' | '/government' | '/industry' | '/university'
+    | '/'
+    | '/access'
+    | '/citizen'
+    | '/government'
+    | '/industry'
+    | '/login'
+    | '/university'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/access' | '/citizen' | '/government' | '/industry' | '/university'
+  to:
+    | '/'
+    | '/access'
+    | '/citizen'
+    | '/government'
+    | '/industry'
+    | '/login'
+    | '/university'
   id:
     | '__root__'
     | '/'
@@ -85,6 +107,7 @@ export interface FileRouteTypes {
     | '/citizen'
     | '/government'
     | '/industry'
+    | '/login'
     | '/university'
   fileRoutesById: FileRoutesById
 }
@@ -94,6 +117,7 @@ export interface RootRouteChildren {
   CitizenRoute: typeof CitizenRoute
   GovernmentRoute: typeof GovernmentRoute
   IndustryRoute: typeof IndustryRoute
+  LoginRoute: typeof LoginRoute
   UniversityRoute: typeof UniversityRoute
 }
 
@@ -134,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndustryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/university': {
       id: '/university'
       path: '/university'
@@ -150,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   CitizenRoute: CitizenRoute,
   GovernmentRoute: GovernmentRoute,
   IndustryRoute: IndustryRoute,
+  LoginRoute: LoginRoute,
   UniversityRoute: UniversityRoute,
 }
 export const routeTree = rootRouteImport
