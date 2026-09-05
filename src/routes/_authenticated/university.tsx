@@ -1,29 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RoleGate } from "@/components/auth/RoleGate";
-import { AmbientBackground } from "@/components/civicx/AmbientBackground";
-import { DashboardShell } from "@/components/civicx/DashboardShell";
-
-const title = "University Console — Build Solution Teams | CivicX";
-const description =
-  "The CivicX university console: discover challenges matched to your students' expertise and build teams that ship real solutions.";
+import { UniversityDashboard } from "@/components/university/UniversityDashboard";
 
 export const Route = createFileRoute("/_authenticated/university")({
   head: () => ({
     meta: [
-      { title },
-      { name: "description", content: description },
-      { property: "og:title", content: title },
-      { property: "og:description", content: description },
+      { title: "University Mission Control — CivicX" },
+      {
+        name: "description",
+        content:
+          "Discover real civic challenges reported by citizens and turn them into student-led innovation missions.",
+      },
+      { property: "og:title", content: "University Mission Control — CivicX" },
+      {
+        property: "og:description",
+        content:
+          "Discover real civic challenges reported by citizens and turn them into student-led innovation missions.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: () => (
-    <RoleGate role="university">
-    <div className="relative min-h-screen overflow-x-hidden">
-      <AmbientBackground />
-      <DashboardShell roleId="university" />
-    </div>
-    </RoleGate>
-  ),
+  component: UniversityRoute,
 });
+
+function UniversityRoute() {
+  return (
+    <RoleGate role="university">
+      <UniversityDashboard />
+    </RoleGate>
+  );
+}
