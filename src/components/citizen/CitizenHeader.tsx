@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Bell } from "lucide-react";
 import { Reveal } from "@/components/civicx/Reveal";
+import { useAuth } from "@/lib/auth-context";
 
 function greeting(hour: number) {
   if (hour < 12) return "Good morning";
@@ -11,17 +12,20 @@ function greeting(hour: number) {
 /** Dashboard greeting bar with live network readout. */
 export function CitizenHeader() {
   const hello = greeting(new Date().getHours());
+  const { currentProfile } = useAuth();
+  const firstName = currentProfile?.name?.trim().split(/\s+/)[0];
 
   return (
     <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl lg:text-4xl">
-          {hello}, <span className="text-gradient">Citizen.</span>
+          {hello}, <span className="text-gradient">{firstName ?? "Citizen"}.</span>
         </h1>
         <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
           Let&apos;s turn today&apos;s problems into tomorrow&apos;s solutions.
         </p>
       </div>
+
 
       <div className="flex items-center gap-3">
         <span className="glass-soft inline-flex items-center gap-2 rounded-xl px-3 py-2 font-mono text-[10px] tracking-[0.18em] text-signal">
