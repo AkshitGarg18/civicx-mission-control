@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight, MapPin } from "lucide-react";
 import { Reveal, SectionLabel } from "@/components/civicx/Reveal";
@@ -6,10 +6,26 @@ import { MissionProgress } from "@/components/civicx/MissionProgress";
 import { PriorityChip, StatusChip } from "@/components/civicx/StatusChip";
 import { statusStage } from "@/lib/civicx-data";
 import { myMissions, type CitizenMission } from "@/lib/citizen-data";
-import { getMyChallenges, toCitizenMission } from "@/lib/challenges-service";
+import {
+  CHALLENGE_CREATED_EVENT,
+  getMyChallenges,
+  toCitizenMission,
+} from "@/lib/challenges-service";
+import { MissionDetail } from "./MissionDetail";
 
 
-function MissionRow({ mission, index }: { mission: CitizenMission; index: number }) {
+
+
+function MissionRow({
+  mission,
+  index,
+  onView,
+}: {
+  mission: CitizenMission;
+  index: number;
+  onView?: (() => void) | undefined;
+}) {
+
   const reduced = useReducedMotion();
 
   return (
@@ -58,6 +74,7 @@ function MissionRow({ mission, index }: { mission: CitizenMission; index: number
 
         <button
           type="button"
+          onClick={onView}
           className="mt-6 inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] text-cyan transition-colors hover:text-foreground"
         >
           VIEW MISSION
@@ -70,23 +87,36 @@ function MissionRow({ mission, index }: { mission: CitizenMission; index: number
 
 /** The citizen's own reported missions with lifecycle timelines. */
 export function MyMissions() {
-  const [missions, setMissions] = useState<CitizenMission[]>(myMissions);
+  const [live, setLive] = useState<CitizenMission[]>([]);
+  const [openId, setOpenId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     let cancelled = false;
     getMyChallenges()
       .then((rows) => {
-        if (cancelled || rows.length === 0) return;
-        // Live rows first; demo missions stay visible until auth + real data land.
-        setMissions([...rows.map(toCitizenMission), ...myMissions]);
+        if (!cancelled) setLive(rows.map(toCitizenMission));
       })
-      .catch(() => {
-        /* demo data stays on screen if the backend is unreachable */
+      .catch((err) => {
+        console.error("[civicx] loading missions failed", err);
       });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    const cancel = load();
+    const onCreated = () => load();
+    window.addEventListener(CHALLENGE_CREATED_EVENT, onCreated);
+    return () => {
+      cancel();
+      window.removeEventListener(CHALLENGE_CREATED_EVENT, onCreated);
+    };
+  }, [load]);
+
+  // Reported challenges first (newest first), demo missions stay as examples.
+  const liveIds = new Set(live.map((m) => m.id));
+  const missions = [...live, ...myMissions];
 
   return (
     <section id="missions" className="scroll-mt-24">
@@ -104,10 +134,18 @@ export function MyMissions() {
 
       <div className="mt-6 grid gap-4">
         {missions.map((m, i) => (
-          <MissionRow key={m.id} mission={m} index={i} />
+          <MissionRow
+            key={m.id}
+            mission={m}
+            index={i}
+            onView={liveIds.has(m.id) ? () => setOpenId(m.id) : undefined}
+          />
         ))}
       </div>
+
+      <MissionDetail challengeId={openId} onClose={() => setOpenId(null)} />
     </section>
   );
 }
+
 

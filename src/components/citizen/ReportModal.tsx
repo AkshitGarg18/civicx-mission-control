@@ -19,12 +19,21 @@ import {
   mockLocations,
   reportCategories,
   reportCategoryAccent,
+  type AiAnalysisResult,
   type MockLocation,
   type ReportCategory,
 } from "@/lib/citizen-data";
 import { AiAnalysis } from "./AiAnalysis";
-import { createChallenge } from "@/lib/challenges-service";
+import {
+  applyChallengeAnalysis,
+  createChallenge,
+  uploadChallengeEvidence,
+  CHALLENGE_CREATED_EVENT,
+  NotAuthenticatedError,
+} from "@/lib/challenges-service";
+import { analyseChallenge, toAnalysisResult } from "@/lib/mock-analysis";
 import { cn } from "@/lib/utils";
+
 
 
 const steps = [
@@ -41,9 +50,11 @@ interface Evidence {
   name: string;
   kind: "photo" | "video" | "document";
   size: string;
+  file: File;
 }
 
-/** Draft report — mirrors the shape a Supabase insert will take later. */
+/** Draft report — the single object sent to the backend on transmit. */
+
 export interface ReportDraft {
   title: string;
   description: string;
@@ -80,7 +91,11 @@ const kindIcon = { photo: ImageIcon, video: Film, document: FileText } as const;
 export function ReportModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const reduced = useReducedMotion();
   const [step, setStep] = useState(0);
-  const [phase, setPhase] = useState<"form" | "transmit" | "analysis">("form");
+  const [phase, setPhase] = useState<"form" | "transmit" | "analysis" | "failed">("form");
+  const [error, setError] = useState<string | null>(null);
+  const [received, setReceived] = useState(false);
+  const [analysis, setAnalysis] = useState<AiAnalysisResult | null>(null);
+
   const [draft, setDraft] = useState<ReportDraft>(emptyDraft);
   const [query, setQuery] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -104,7 +119,11 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
     setPhase("form");
     setDraft(emptyDraft);
     setQuery("");
+    setError(null);
+    setReceived(false);
+    setAnalysis(null);
   };
+
 
   const finish = () => {
     onClose();
@@ -135,24 +154,79 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
       name: f.name,
       kind: kindFor(f),
       size: `${Math.max(1, Math.round(f.size / 1024))} KB`,
+      file: f,
     }));
     setDraft((d) => ({ ...d, evidence: [...d.evidence, ...next] }));
   };
 
-  const transmit = () => {
-    setPhase("transmit");
-    // Persists to the backend when a session exists; in demo mode this resolves
-    // to null and the flow continues exactly as before.
-    void createChallenge({
-      title: draft.title.trim(),
-      description: draft.description.trim(),
-      category: draft.category,
-      locationName: draft.location?.label ?? null,
-      latitude: parseCoord(draft.location?.lat),
-      longitude: parseCoord(draft.location?.lng),
-    }).catch((err) => console.error("createChallenge failed", err));
-    setTimeout(() => setPhase("analysis"), reduced ? 200 : 1800);
+  /** Field-level checks surfaced inside the review step. */
+  const validate = (): string | null => {
+    if (draft.title.trim().length < 3) return "Add a challenge title of at least 3 characters.";
+    if (draft.description.trim().length < 10)
+      return "Describe the problem in at least 10 characters.";
+    if (!draft.category) return "Choose a category for this challenge.";
+    if (!draft.location) return "Select the location where this is happening.";
+    const lat = parseCoord(draft.location.lat);
+    const lng = parseCoord(draft.location.lng);
+    if (lat === null || lng === null || Math.abs(lat) > 90 || Math.abs(lng) > 180)
+      return "The selected location has invalid coordinates.";
+    return null;
   };
+
+  const transmit = async () => {
+    const problem = validate();
+    if (problem) {
+      setError(problem);
+      return;
+    }
+
+    setError(null);
+    setReceived(false);
+    setPhase("transmit");
+
+    try {
+      const challenge = await createChallenge({
+        title: draft.title.trim(),
+        description: draft.description.trim(),
+        category: draft.category,
+        locationName: draft.location?.label ?? null,
+        latitude: parseCoord(draft.location?.lat),
+        longitude: parseCoord(draft.location?.lng),
+      });
+
+      if (draft.evidence.length > 0) {
+        await uploadChallengeEvidence(
+          challenge.id,
+          draft.evidence.map((e) => e.file),
+        );
+      }
+
+      // TEMPORARY: local placeholder analysis, replaced by Gemini later.
+      const mock = analyseChallenge({
+        title: draft.title.trim(),
+        description: draft.description.trim(),
+        category: draft.category,
+        locationName: draft.location?.label ?? null,
+      });
+      await applyChallengeAnalysis(challenge.id, mock);
+      setAnalysis(toAnalysisResult(mock, challenge.id));
+
+      window.dispatchEvent(new Event(CHALLENGE_CREATED_EVENT));
+      setReceived(true);
+      setTimeout(() => setPhase("analysis"), reduced ? 150 : 900);
+    } catch (err) {
+      console.error("[civicx] challenge transmission failed", err);
+      setError(
+        err instanceof NotAuthenticatedError
+          ? err.message
+          : err instanceof Error && err.message.startsWith("We could not")
+            ? err.message
+            : "Your challenge could not be submitted. Please try again.",
+      );
+      setPhase("failed");
+    }
+  };
+
 
 
   return (
@@ -183,7 +257,16 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                     CIVICX // {phase === "form" ? `STEP ${steps[step]!.no} — ${steps[step]!.key}` : "SIGNAL TRANSMISSION"}
                   </p>
                   <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">
-                    {phase === "form" ? steps[step]!.heading : phase === "transmit" ? "Transmitting…" : "Signal received"}
+                    {phase === "form"
+                      ? steps[step]!.heading
+                      : phase === "transmit"
+                        ? received
+                          ? "Signal received"
+                          : "Transmitting…"
+                        : phase === "failed"
+                          ? "Transmission failed"
+                          : "Signal received"}
+
                   </h2>
                 </div>
                 <button
@@ -473,9 +556,14 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                             <p className="font-mono text-sm tracking-[0.18em] text-cyan">
                               Ready to transmit?
                             </p>
+                            {error && (
+                              <p className="mx-auto mt-3 max-w-md text-xs text-destructive">
+                                {error}
+                              </p>
+                            )}
                             <motion.button
                               type="button"
-                              onClick={transmit}
+                              onClick={() => void transmit()}
                               whileHover={reduced ? {} : { y: -2 }}
                               whileTap={{ scale: 0.98 }}
                               className="mt-4 inline-flex items-center gap-2 rounded-xl px-6 py-3 font-mono text-[11px] font-semibold tracking-[0.18em] text-background motion-reduce:transform-none"
@@ -485,6 +573,7 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                               <ArrowRight className="h-4 w-4" />
                             </motion.button>
                           </div>
+
                         </div>
                       )}
                     </motion.div>
@@ -549,7 +638,7 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                     </span>
                   </span>
                   <p className="mt-8 font-mono text-[11px] tracking-[0.28em] text-cyan">
-                    TRANSMITTING CIVIC SIGNAL
+                    {received ? "SIGNAL RECEIVED" : "TRANSMITTING CIVIC SIGNAL"}
                   </p>
                   <p className="mt-2 font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
                     ROUTING TO CIVICX INTELLIGENCE
@@ -557,11 +646,51 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                 </div>
               )}
 
-              {phase === "analysis" && (
-                <div className="mt-8">
-                  <AiAnalysis onCreateMission={finish} />
+              {phase === "failed" && (
+                <div className="grid place-items-center py-16 text-center">
+                  <span className="grid h-14 w-14 place-items-center rounded-full border border-destructive/40 bg-destructive/10">
+                    <X className="h-5 w-5 text-destructive" />
+                  </span>
+                  <p className="mt-6 font-mono text-[11px] tracking-[0.28em] text-destructive">
+                    TRANSMISSION FAILED
+                  </p>
+                  <p className="mt-3 max-w-sm text-sm text-muted-foreground">
+                    {error ?? "Your challenge could not be submitted. Please try again."}
+                  </p>
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void transmit()}
+                      className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-mono text-[10px] font-semibold tracking-[0.16em] text-background"
+                      style={{ backgroundImage: "var(--gradient-accent)" }}
+                    >
+                      RETRY TRANSMISSION
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhase("form");
+                        setStep(3);
+                      }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 font-mono text-[10px] tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                      BACK TO REVIEW
+                    </button>
+                  </div>
                 </div>
               )}
+
+              {phase === "analysis" && (
+                <div className="mt-8">
+                  <AiAnalysis
+                    {...(analysis ? { result: analysis } : {})}
+                    onCreateMission={finish}
+                  />
+                </div>
+              )}
+
             </div>
           </motion.div>
         </div>
