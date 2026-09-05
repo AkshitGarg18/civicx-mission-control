@@ -1,0 +1,108 @@
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Menu, X, Hexagon } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const links = [
+  { label: "Explore Challenges", href: "#live-world" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "Impact", href: "#impact" },
+  { label: "For Universities", href: "#forces" },
+  { label: "For Industry", href: "#forces" },
+];
+
+export function NavBar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
+      <motion.nav
+        initial={{ opacity: 0, y: -18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className={cn(
+          "mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-2xl px-4 py-3 transition-all duration-500 lg:px-6",
+          scrolled ? "glass" : "glass-soft",
+          scrolled && "py-2.5",
+        )}
+      >
+        <a href="#top" className="flex min-w-0 items-center gap-2.5">
+          <span className="relative grid h-9 w-9 shrink-0 place-items-center">
+            <Hexagon className="h-9 w-9 text-cyan/70" strokeWidth={1.2} />
+            <span className="absolute h-2 w-2 rounded-full bg-cyan shadow-[0_0_12px_var(--neon-cyan)]" />
+          </span>
+          <span className="truncate font-display text-lg font-semibold tracking-tight">
+            Civic<span className="text-gradient">X</span>
+          </span>
+        </a>
+
+        <div className="hidden items-center gap-1 lg:flex">
+          {links.map((l) => (
+            <a
+              key={l.label}
+              href={l.href}
+              className="relative rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {l.label}
+            </a>
+          ))}
+          <a
+            href="#launch"
+            className="ml-2 rounded-xl border border-cyan/35 bg-cyan/10 px-4 py-2 text-sm font-medium text-cyan transition-all duration-300 hover:bg-cyan/20 hover:shadow-[var(--shadow-glow-cyan)] active:scale-[0.97]"
+          >
+            Enter Platform
+          </a>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle navigation"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border text-foreground lg:hidden"
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="col-span-2 overflow-hidden lg:hidden"
+            >
+              <div className="mt-2 flex flex-col gap-1 border-t border-border pt-3">
+                {links.map((l) => (
+                  <a
+                    key={l.label}
+                    href={l.href}
+                    onClick={() => setOpen(false)}
+                    className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                  >
+                    {l.label}
+                  </a>
+                ))}
+                <a
+                  href="#launch"
+                  onClick={() => setOpen(false)}
+                  className="mt-1 rounded-xl border border-cyan/35 bg-cyan/10 px-3 py-2.5 text-center text-sm font-medium text-cyan"
+                >
+                  Enter Platform
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
+    </header>
+  );
+}
