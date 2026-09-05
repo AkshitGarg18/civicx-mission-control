@@ -40,6 +40,7 @@ export function CitizenDashboard() {
           CIVICX // CITIZEN CONSOLE — DEMO DATA
         </footer>
       </main>
+      </div>
 
       <ReportModal open={reportOpen} onClose={() => setReportOpen(false)} />
     </div>
