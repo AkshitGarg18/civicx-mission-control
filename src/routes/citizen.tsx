@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AmbientBackground } from "@/components/civicx/AmbientBackground";
-import { DashboardShell } from "@/components/civicx/DashboardShell";
+import { CitizenDashboard } from "@/components/citizen/CitizenDashboard";
 
-const title = "Citizen Console — Report Challenges | CivicX";
+const title = "Citizen Mission Control | CivicX";
 const description =
-  "The CivicX citizen console: report problems in your community, track their progress and see the impact of solved challenges.";
+  "Report civic challenges, track how your reports progress through AI analysis and university matching, and see the impact you create in your community.";
 
 export const Route = createFileRoute("/citizen")({
   head: () => ({
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/citizen")({
   component: () => (
     <div className="relative min-h-screen overflow-x-hidden">
       <AmbientBackground />
-      <DashboardShell roleId="citizen" />
+      <CitizenDashboard />
     </div>
   ),
 });
