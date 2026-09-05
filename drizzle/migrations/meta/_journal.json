@@ -15,6 +15,13 @@
       "when": 1788614895094,
       "tag": "0001_challenge_evidence_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788618555311,
+      "tag": "0002_add_challenge_ai_analysis_fields",
+      "breakpoints": true
     }
   ]
 }

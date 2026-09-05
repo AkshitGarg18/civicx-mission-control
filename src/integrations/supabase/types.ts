@@ -83,6 +83,7 @@ export type Database = {
       }
       challenges: {
         Row: {
+          affected_stakeholders: string[] | null
           ai_confidence: number | null
           ai_summary: string | null
           category: string | null
@@ -96,11 +97,13 @@ export type Database = {
           longitude: number | null
           priority: string
           recommended_skills: string[] | null
+          solution_directions: string[] | null
           status: string
           title: string
           updated_at: string
         }
         Insert: {
+          affected_stakeholders?: string[] | null
           ai_confidence?: number | null
           ai_summary?: string | null
           category?: string | null
@@ -114,11 +117,13 @@ export type Database = {
           longitude?: number | null
           priority?: string
           recommended_skills?: string[] | null
+          solution_directions?: string[] | null
           status?: string
           title: string
           updated_at?: string
         }
         Update: {
+          affected_stakeholders?: string[] | null
           ai_confidence?: number | null
           ai_summary?: string | null
           category?: string | null
@@ -132,6 +137,7 @@ export type Database = {
           longitude?: number | null
           priority?: string
           recommended_skills?: string[] | null
+          solution_directions?: string[] | null
           status?: string
           title?: string
           updated_at?: string
