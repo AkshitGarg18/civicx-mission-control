@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { roleById, type RoleId } from "@/lib/civicx-roles";
@@ -14,7 +14,6 @@ export function DashboardShell({
   roleId: RoleId;
   children?: React.ReactNode;
 }) {
-  const reduced = useReducedMotion();
   const role = roleById[roleId];
   const Icon = role.icon;
 
