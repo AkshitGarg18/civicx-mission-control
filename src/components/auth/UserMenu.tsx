@@ -19,7 +19,11 @@ function initialsFor(name: string | null | undefined, email: string | null | und
  * Signed-in operator badge with the console menu (Profile, My Missions,
  * Settings, Sign Out). Sign-out clears cached data before leaving.
  */
-export function UserMenu({ onNavigateSection }: { onNavigateSection?: (id: string) => void }) {
+export function UserMenu({
+  onNavigateSection,
+}: {
+  onNavigateSection?: ((id: string) => void) | undefined;
+}) {
   const reduced = useReducedMotion();
   const { currentProfile, currentUser, signOut } = useAuth();
   const navigate = useNavigate();

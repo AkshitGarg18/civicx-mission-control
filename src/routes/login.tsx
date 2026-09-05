@@ -10,8 +10,8 @@ const description =
 const validRoles: RoleId[] = ["citizen", "university", "industry", "government"];
 
 export interface AuthSearch {
-  role?: RoleId;
-  redirect?: string;
+  role?: RoleId | undefined;
+  redirect?: string | undefined;
 }
 
 export function parseAuthSearch(search: Record<string, unknown>): AuthSearch {

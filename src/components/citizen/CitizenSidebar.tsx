@@ -56,7 +56,7 @@ function NavList({
   );
 }
 
-function SidebarFooter({ onNavigate }: { onNavigate?: (id: string) => void }) {
+function SidebarFooter({ onNavigate }: { onNavigate?: ((id: string) => void) | undefined }) {
   return (
     <div className="space-y-4">
       <div className="glass-soft rounded-xl px-3 py-3">
