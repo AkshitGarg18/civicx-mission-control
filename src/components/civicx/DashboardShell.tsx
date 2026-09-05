@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { roleById, type RoleId } from "@/lib/civicx-roles";
@@ -14,6 +14,7 @@ export function DashboardShell({
   roleId: RoleId;
   children?: React.ReactNode;
 }) {
+  const reduced = useReducedMotion();
   const role = roleById[roleId];
   const Icon = role.icon;
 
@@ -34,8 +35,7 @@ export function DashboardShell({
 
       <motion.div
         className="glass relative mx-auto mt-10 max-w-4xl overflow-hidden rounded-[2rem] px-6 py-16 text-center sm:px-12"
-        initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
-        whileInView={{ opacity: 1 }}
+        initial={reduced ? false : { opacity: 0, y: 24, filter: "blur(8px)" }}
         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       >
