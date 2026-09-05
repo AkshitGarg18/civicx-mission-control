@@ -17,6 +17,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthenticatedCitizenRouteImport } from './routes/_authenticated/citizen'
 import { Route as AuthenticatedGovernmentRouteImport } from './routes/_authenticated/government'
 import { Route as AuthenticatedIndustryRouteImport } from './routes/_authenticated/industry'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedUniversityRouteImport } from './routes/_authenticated/university'
 
 const IndexRoute = IndexRouteImport.update({
@@ -58,6 +59,11 @@ const AuthenticatedIndustryRoute = AuthenticatedIndustryRouteImport.update({
   path: '/industry',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedUniversityRoute = AuthenticatedUniversityRouteImport.update({
   id: '/university',
   path: '/university',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/citizen': typeof AuthenticatedCitizenRoute
   '/government': typeof AuthenticatedGovernmentRoute
   '/industry': typeof AuthenticatedIndustryRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/university': typeof AuthenticatedUniversityRoute
 }
 export interface FileRoutesByTo {
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/citizen': typeof AuthenticatedCitizenRoute
   '/government': typeof AuthenticatedGovernmentRoute
   '/industry': typeof AuthenticatedIndustryRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/university': typeof AuthenticatedUniversityRoute
 }
 export interface FileRoutesById {
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/_authenticated/citizen': typeof AuthenticatedCitizenRoute
   '/_authenticated/government': typeof AuthenticatedGovernmentRoute
   '/_authenticated/industry': typeof AuthenticatedIndustryRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/university': typeof AuthenticatedUniversityRoute
 }
 export interface FileRouteTypes {
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/citizen'
     | '/government'
     | '/industry'
+    | '/profile'
     | '/university'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/citizen'
     | '/government'
     | '/industry'
+    | '/profile'
     | '/university'
   id:
     | '__root__'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/_authenticated/citizen'
     | '/_authenticated/government'
     | '/_authenticated/industry'
+    | '/_authenticated/profile'
     | '/_authenticated/university'
   fileRoutesById: FileRoutesById
 }
@@ -196,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndustryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/university': {
       id: '/_authenticated/university'
       path: '/university'
@@ -210,6 +229,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCitizenRoute: typeof AuthenticatedCitizenRoute
   AuthenticatedGovernmentRoute: typeof AuthenticatedGovernmentRoute
   AuthenticatedIndustryRoute: typeof AuthenticatedIndustryRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedUniversityRoute: typeof AuthenticatedUniversityRoute
 }
 
@@ -217,6 +237,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCitizenRoute: AuthenticatedCitizenRoute,
   AuthenticatedGovernmentRoute: AuthenticatedGovernmentRoute,
   AuthenticatedIndustryRoute: AuthenticatedIndustryRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedUniversityRoute: AuthenticatedUniversityRoute,
 }
 
