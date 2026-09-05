@@ -705,8 +705,11 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                 <div className="mt-8">
                   <AiAnalysis
                     {...(analysis ? { result: analysis } : {})}
+                    {...(analysisError ? { error: analysisError } : {})}
+                    {...(challengeId ? { onRetry: () => void analyse(challengeId) } : {})}
                     onCreateMission={finish}
                   />
+
                 </div>
               )}
 
