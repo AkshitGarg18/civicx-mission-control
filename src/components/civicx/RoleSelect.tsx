@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Hexagon } from "lucide-react";
-import { networkStatus, roles, type RoleDefinition } from "@/lib/civicx-roles";
+import { networkStatus, roleById, roles, type RoleDefinition } from "@/lib/civicx-roles";
+import { supabase } from "@/integrations/supabase/client";
 import { Counter } from "./Counter";
 import { RoleCard } from "./RoleCard";
 
@@ -14,11 +15,41 @@ export function RoleSelect() {
 
   useEffect(() => {
     if (!selected) return;
-    const t = setTimeout(() => {
-      void navigate({ to: selected.to });
-    }, reduced ? 120 : 900);
-    return () => clearTimeout(t);
+    let alive = true;
+
+    const run = async () => {
+      // Signed-in operators go straight to their own console; everyone else is
+      // sent to sign-in with the chosen role preserved.
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
+      if (!alive) return;
+
+      if (!user) {
+        void navigate({
+          to: "/login",
+          search: { role: selected.id, redirect: selected.to },
+        });
+        return;
+      }
+
+      const profile = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (!alive) return;
+
+      const role = (profile.data?.role ?? selected.id) as RoleDefinition["id"];
+      void navigate({ to: roleById[role]?.to ?? selected.to });
+    };
+
+    const t = setTimeout(() => void run(), reduced ? 120 : 900);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+    };
   }, [selected, navigate, reduced]);
+
 
   return (
     <div className="relative flex min-h-screen flex-col px-4 py-8 sm:px-6 lg:py-12">
