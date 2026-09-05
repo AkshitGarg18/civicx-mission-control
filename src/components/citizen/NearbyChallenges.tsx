@@ -1,40 +1,25 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { ClientOnly } from "@tanstack/react-router";
 import { Radio } from "lucide-react";
 import { Reveal, SectionLabel } from "@/components/civicx/Reveal";
-import { NodeNetwork } from "@/components/civicx/NodeNetwork";
-import { ChallengePanel } from "@/components/civicx/ChallengePanel";
-import { CategoryDot, PriorityChip } from "@/components/civicx/StatusChip";
-import type { ChallengeNode, Priority } from "@/lib/civicx-data";
-import { nearbyChallenges } from "@/lib/citizen-data";
+import { PriorityChip } from "@/components/civicx/StatusChip";
 import {
   CHALLENGE_CREATED_EVENT,
   getMapChallenges,
   hasCoordinates,
   subscribeToNewChallenges,
-  toChallengeNode,
   type ChallengeRow,
 } from "@/lib/challenges-service";
 import { MissionDetail } from "./MissionDetail";
 
-/** Category filters, matching the labels used across the platform. */
-const categoryFilters = [
-  { label: "ALL", match: null },
-  { label: "WATER", match: "Water" },
-  { label: "WASTE", match: "Waste" },
-  { label: "EDUCATION", match: "Education" },
-  { label: "HEALTHCARE", match: "Healthcare" },
-  { label: "INFRASTRUCTURE", match: "Infrastructure" },
-  { label: "PUBLIC SAFETY", match: "Safety" },
-  { label: "ENVIRONMENT", match: "Waste" },
-] as const;
+const ChallengeMap = lazy(() => import("./ChallengeMap"));
 
-const priorityFilters = ["ALL", "LOW", "MEDIUM", "HIGH", "CRITICAL"] as const;
+const priorityFilters = ["ALL", "CRITICAL", "HIGH", "MEDIUM", "LOW"] as const;
 
-/** Community signal map: real civic signals as glowing nodes. */
+/** Real geographic signal map fed by the citizen's stored challenges. */
 export function NearbyChallenges() {
-  const reduced = useReducedMotion();
-  const [selected, setSelected] = useState<ChallengeNode | null>(null);
+  const reduced = useReducedMotion() ?? false;
   const [detailId, setDetailId] = useState<string | null>(null);
   const [rows, setRows] = useState<ChallengeRow[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -44,15 +29,6 @@ export function NearbyChallenges() {
   const [signal, setSignal] = useState<string | null>(null);
   const firstLoad = useRef(true);
 
-  const merge = useCallback((incoming: ChallengeRow[]) => {
-    setRows((prev) => {
-      const byId = new Map(prev.map((r) => [r.id, r]));
-      incoming.forEach((r) => byId.set(r.id, r));
-      return [...byId.values()].sort((a, b) => b.created_at.localeCompare(a.created_at));
-    });
-  }, []);
-
-  /** Announce a genuinely new signal from this session. */
   const announce = useCallback((row: ChallengeRow) => {
     setArriving((prev) => (prev.includes(row.id) ? prev : [...prev, row.id]));
     setSignal(row.title);
@@ -88,31 +64,44 @@ export function NearbyChallenges() {
     const onCreated = () => void load(true);
     window.addEventListener(CHALLENGE_CREATED_EVENT, onCreated);
 
+    // realtime inserts still pass through RLS, so only permitted rows arrive
     const unsubscribe = subscribeToNewChallenges((row) => {
       if (!hasCoordinates(row)) return;
-      merge([row]);
+      setRows((prev) =>
+        prev.some((r) => r.id === row.id)
+          ? prev
+          : [row, ...prev].sort((a, b) => b.created_at.localeCompare(a.created_at)),
+      );
       announce(row);
     });
 
+    // safety net in case the realtime socket drops
+    const poll = window.setInterval(() => void load(true), 60_000);
+
     return () => {
       window.removeEventListener(CHALLENGE_CREATED_EVENT, onCreated);
+      window.clearInterval(poll);
       unsubscribe();
     };
-  }, [load, merge, announce]);
+  }, [load, announce]);
 
-  const liveNodes = useMemo(() => rows.map((r, i) => toChallengeNode(r, i)), [rows]);
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    rows.forEach((r) => r.category && set.add(r.category.toUpperCase()));
+    return ["ALL", ...[...set].sort()];
+  }, [rows]);
 
-  /** Demo nodes fill the canvas only until real signals exist. */
-  const demoNodes = liveNodes.length > 0 ? [] : nearbyChallenges;
+  const filtered = useMemo(
+    () =>
+      rows.filter(
+        (r) =>
+          (category === "ALL" || (r.category ?? "").toUpperCase() === category) &&
+          (priority === "ALL" || r.priority === priority),
+      ),
+    [rows, category, priority],
+  );
 
-  const nodes = useMemo(() => {
-    const wanted = categoryFilters.find((f) => f.label === category)?.match ?? null;
-    return [...liveNodes, ...demoNodes].filter(
-      (n) =>
-        (!wanted || n.category === wanted) &&
-        (priority === "ALL" || n.priority === (priority as Priority)),
-    );
-  }, [liveNodes, demoNodes, category, priority]);
+  const onViewMission = useCallback((id: string) => setDetailId(id), []);
 
   return (
     <section id="nearby" className="scroll-mt-24">
@@ -120,7 +109,7 @@ export function NearbyChallenges() {
         <div>
           <SectionLabel>CHALLENGES NEAR YOU</SectionLabel>
           <p className="mt-3 text-sm text-muted-foreground">
-            Explore civic signals around your community.
+            Live civic signals plotted on the real map of your city.
           </p>
         </div>
         <span className="flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
@@ -128,28 +117,28 @@ export function NearbyChallenges() {
             className="h-1.5 w-1.5 rounded-full bg-[var(--signal)]"
             style={reduced ? {} : { animation: "pulse-node 2.4s ease-in-out infinite" }}
           />
-          {liveNodes.length > 0
-            ? `${liveNodes.length} LIVE CIVIC SIGNAL${liveNodes.length === 1 ? "" : "S"}`
+          {rows.length > 0
+            ? `${filtered.length} / ${rows.length} MAPPED SIGNAL${rows.length === 1 ? "" : "S"}`
             : loaded
-              ? "DEMO DATA — NO LIVE SIGNALS YET"
+              ? "NO MAPPED SIGNALS YET"
               : "SYNCING NETWORK…"}
         </span>
       </Reveal>
 
       <Reveal delay={0.06} className="mt-5">
         <div className="flex flex-wrap items-center gap-2">
-          {categoryFilters.map((f) => (
+          {categories.map((c) => (
             <button
-              key={f.label}
+              key={c}
               type="button"
-              onClick={() => setCategory(f.label)}
+              onClick={() => setCategory(c)}
               className={
-                category === f.label
+                category === c
                   ? "rounded-xl border border-cyan/45 bg-cyan/10 px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-cyan"
                   : "rounded-xl border border-border px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-muted-foreground transition-colors hover:border-cyan/30 hover:text-foreground"
               }
             >
-              {f.label}
+              {c}
             </button>
           ))}
         </div>
@@ -174,7 +163,7 @@ export function NearbyChallenges() {
       </Reveal>
 
       <Reveal delay={0.08} className="mt-6">
-        <div className="glass grid-floor relative overflow-hidden rounded-[1.75rem] p-4 sm:p-6">
+        <div className="glass relative overflow-hidden rounded-[1.75rem] p-3 sm:p-4">
           <AnimatePresence>
             {signal && (
               <motion.div
@@ -182,71 +171,71 @@ export function NearbyChallenges() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="glass-soft absolute left-1/2 top-4 z-40 -translate-x-1/2 rounded-2xl border border-cyan/35 px-4 py-2.5 text-center"
+                className="glass-soft absolute left-1/2 top-6 z-40 -translate-x-1/2 rounded-2xl border border-cyan/35 px-4 py-2.5 text-center"
               >
                 <span className="flex items-center justify-center gap-2 font-mono text-[10px] tracking-[0.2em] text-cyan">
                   <Radio className="h-3 w-3" />
-                  SIGNAL DETECTED
+                  CIVIC SIGNAL DETECTED
                 </span>
                 <p className="mt-1 font-mono text-[10px] tracking-[0.16em] text-muted-foreground">
-                  NEW CIVIC MISSION — {signal.toUpperCase()}
+                  {signal.toUpperCase()}
                 </p>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="relative h-[26rem] w-full sm:h-[30rem]">
-            {nodes.length === 0 ? (
-              <div className="grid h-full place-items-center">
-                <p className="font-mono text-[11px] tracking-[0.16em] text-muted-foreground">
-                  NO SIGNALS MATCH THIS FILTER
-                </p>
-              </div>
-            ) : (
-              <NodeNetwork
-                nodes={nodes}
-                autoLink
-                ambient
-                showLabels={false}
-                arriving={arriving}
-                onSelect={setSelected}
-              />
-            )}
+          <div className="h-[24rem] w-full sm:h-[30rem] lg:h-[34rem]">
+            <ClientOnly
+              fallback={
+                <div className="grid h-full place-items-center rounded-2xl border border-border/70">
+                  <p className="font-mono text-[11px] tracking-[0.18em] text-muted-foreground">
+                    LOADING TERRAIN…
+                  </p>
+                </div>
+              }
+            >
+              <Suspense
+                fallback={
+                  <div className="grid h-full place-items-center rounded-2xl border border-border/70">
+                    <p className="font-mono text-[11px] tracking-[0.18em] text-muted-foreground">
+                      LOADING TERRAIN…
+                    </p>
+                  </div>
+                }
+              >
+                <ChallengeMap
+                  rows={filtered}
+                  arriving={arriving}
+                  reduced={reduced}
+                  onViewMission={onViewMission}
+                />
+              </Suspense>
+            </ClientOnly>
           </div>
 
-          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {nodes.slice(0, 6).map((node) => (
-              <button
-                key={node.id}
-                type="button"
-                onClick={() => setSelected(node)}
-                className="glass-soft flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:border-cyan/40"
-              >
-                <span className="flex min-w-0 items-center gap-2">
-                  <CategoryDot category={node.category} />
+          {filtered.length > 0 && (
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.slice(0, 6).map((row) => (
+                <button
+                  key={row.id}
+                  type="button"
+                  onClick={() => setDetailId(row.id)}
+                  className="glass-soft flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:border-cyan/40"
+                >
                   <span className="min-w-0">
-                    <span className="block truncate text-sm">{node.name}</span>
+                    <span className="block truncate text-sm">{row.title}</span>
                     <span className="block truncate text-[11px] text-muted-foreground">
-                      {node.location}
-                      {node.affected ? ` • ${node.affected}` : ""}
+                      {row.location_name ?? "Location pending"}
+                      {row.category ? ` • ${row.category}` : ""}
                     </span>
                   </span>
-                </span>
-                <PriorityChip priority={node.priority} />
-              </button>
-            ))}
-          </div>
+                  <PriorityChip priority={row.priority as never} />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </Reveal>
-
-      <ChallengePanel
-        node={selected}
-        onClose={() => setSelected(null)}
-        onViewMission={(node) => {
-          setSelected(null);
-          setDetailId(node.id);
-        }}
-      />
 
       <MissionDetail challengeId={detailId} onClose={() => setDetailId(null)} />
     </section>
