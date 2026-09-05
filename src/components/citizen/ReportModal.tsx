@@ -23,7 +23,9 @@ import {
   type ReportCategory,
 } from "@/lib/citizen-data";
 import { AiAnalysis } from "./AiAnalysis";
+import { createChallenge } from "@/lib/challenges-service";
 import { cn } from "@/lib/utils";
+
 
 const steps = [
   { no: "01", key: "IDENTIFY", heading: "What's happening?" },
@@ -63,6 +65,15 @@ function kindFor(file: File): Evidence["kind"] {
   if (file.type.startsWith("video/")) return "video";
   return "document";
 }
+
+/** "28.7495° N" -> 28.7495 (negative for S/W). */
+function parseCoord(raw?: string): number | null {
+  if (!raw) return null;
+  const value = Number.parseFloat(raw);
+  if (Number.isNaN(value)) return null;
+  return /[SW]/i.test(raw) ? -value : value;
+}
+
 
 const kindIcon = { photo: ImageIcon, video: Film, document: FileText } as const;
 
@@ -130,8 +141,19 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
 
   const transmit = () => {
     setPhase("transmit");
+    // Persists to the backend when a session exists; in demo mode this resolves
+    // to null and the flow continues exactly as before.
+    void createChallenge({
+      title: draft.title.trim(),
+      description: draft.description.trim(),
+      category: draft.category,
+      locationName: draft.location?.label ?? null,
+      latitude: parseCoord(draft.location?.lat),
+      longitude: parseCoord(draft.location?.lng),
+    }).catch((err) => console.error("createChallenge failed", err));
     setTimeout(() => setPhase("analysis"), reduced ? 200 : 1800);
   };
+
 
   return (
     <AnimatePresence>
