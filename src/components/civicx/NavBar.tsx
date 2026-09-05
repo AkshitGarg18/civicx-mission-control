@@ -8,18 +8,40 @@ const links = [
   { label: "How It Works", href: "#how-it-works" },
   { label: "Impact", href: "#impact" },
   { label: "For Universities", href: "#forces" },
-  { label: "For Industry", href: "#forces" },
+  { label: "For Industry", href: "#missions" },
 ];
 
 export function NavBar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [activeId, setActiveId] = useState<string>("#top");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // highlight the nav item for the section currently in view
+  useEffect(() => {
+    const ids = ["top", "live-world", "impact", "how-it-works", "forces", "missions"];
+    const sections = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActiveId(`#${visible.target.id}`);
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.25, 0.6, 1] },
+    );
+    sections.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -29,14 +51,20 @@ export function NavBar() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
-          "mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-2xl px-4 py-3 transition-all duration-500 lg:px-6",
-          scrolled ? "glass" : "glass-soft",
-          scrolled && "py-2.5",
+          "mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-2xl px-4 transition-all duration-500 lg:px-6",
+          scrolled
+            ? "glass py-2 shadow-[0_10px_40px_-18px_color-mix(in_oklab,var(--neon-cyan)_35%,transparent)]"
+            : "border border-transparent bg-transparent py-4 backdrop-blur-[2px]",
         )}
       >
         <a href="#top" className="flex min-w-0 items-center gap-2.5">
-          <span className="relative grid h-9 w-9 shrink-0 place-items-center">
-            <Hexagon className="h-9 w-9 text-cyan/70" strokeWidth={1.2} />
+          <span
+            className={cn(
+              "relative grid shrink-0 place-items-center transition-all duration-500",
+              scrolled ? "h-8 w-8" : "h-9 w-9",
+            )}
+          >
+            <Hexagon className="h-full w-full text-cyan/70" strokeWidth={1.2} />
             <span className="absolute h-2 w-2 rounded-full bg-cyan shadow-[0_0_12px_var(--neon-cyan)]" />
           </span>
           <span className="truncate font-display text-lg font-semibold tracking-tight">
@@ -45,15 +73,32 @@ export function NavBar() {
         </a>
 
         <div className="hidden items-center gap-1 lg:flex">
-          {links.map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              className="relative rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {l.label}
-            </a>
-          ))}
+          {links.map((l) => {
+            const isActive = activeId === l.href;
+            return (
+              <a
+                key={l.label}
+                href={l.href}
+                className={cn(
+                  "relative rounded-lg px-3 py-2 text-sm transition-colors",
+                  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {l.label}
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-active"
+                    transition={{ type: "spring", stiffness: 340, damping: 30 }}
+                    className="absolute inset-x-2 -bottom-0.5 h-px"
+                    style={{
+                      backgroundImage: "var(--gradient-accent)",
+                      boxShadow: "0 0 10px var(--neon-cyan)",
+                    }}
+                  />
+                )}
+              </a>
+            );
+          })}
           <a
             href="#launch"
             className="ml-2 rounded-xl border border-cyan/35 bg-cyan/10 px-4 py-2 text-sm font-medium text-cyan transition-all duration-300 hover:bg-cyan/20 hover:shadow-[var(--shadow-glow-cyan)] active:scale-[0.97]"

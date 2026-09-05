@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { ArrowRight, Radar } from "lucide-react";
-import { heroLinks, heroNodes } from "@/lib/civicx-data";
+import { heroLinks, heroNodes, type ChallengeNode } from "@/lib/civicx-data";
 import { NodeNetwork } from "./NodeNetwork";
+import { ChallengePanel } from "./ChallengePanel";
 import { Counter } from "./Counter";
 
 export function Hero() {
   const reduced = useReducedMotion();
+  const [selected, setSelected] = useState<ChallengeNode | null>(null);
   const { scrollY } = useScroll();
   const visualY = useTransform(scrollY, [0, 600], [0, reduced ? 0 : -60]);
   const copyY = useTransform(scrollY, [0, 600], [0, reduced ? 0 : 40]);
@@ -103,18 +106,28 @@ export function Hero() {
                 />
               )}
               <div className="absolute inset-5 sm:inset-8">
-                <NodeNetwork nodes={heroNodes} links={heroLinks} />
+                <NodeNetwork
+                  nodes={heroNodes}
+                  links={heroLinks}
+                  ambient
+                  onSelect={setSelected}
+                />
               </div>
             </div>
 
             <div className="mt-3 grid grid-cols-3 gap-2 font-mono text-[10px] tracking-[0.14em] text-muted-foreground">
-              <span className="glass-soft rounded-lg px-3 py-2">NODES 06</span>
+              <span className="glass-soft rounded-lg px-3 py-2">SIGNALS 06</span>
               <span className="glass-soft rounded-lg px-3 py-2">LINKS 08</span>
               <span className="glass-soft rounded-lg px-3 py-2 text-signal/90">SYNCED</span>
             </div>
+            <p className="mt-2 px-1 font-mono text-[10px] tracking-[0.14em] text-muted-foreground/60">
+              SELECT A SIGNAL TO OPEN ITS MISSION DOSSIER · DEMO DATA
+            </p>
           </div>
         </motion.div>
       </div>
+
+      <ChallengePanel node={selected} onClose={() => setSelected(null)} />
     </section>
   );
 }

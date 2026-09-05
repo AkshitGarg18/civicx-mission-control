@@ -1,9 +1,17 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { categories, liveStats, mapNodes, type ChallengeCategory } from "@/lib/civicx-data";
+import {
+  categories,
+  liveStats,
+  mapNodes,
+  type ChallengeCategory,
+  type ChallengeNode,
+} from "@/lib/civicx-data";
 import { NodeNetwork } from "./NodeNetwork";
 import { Counter } from "./Counter";
 import { Reveal, SectionLabel } from "./Reveal";
+import { LiveSignals } from "./LiveSignals";
+import { ChallengePanel } from "./ChallengePanel";
 import { cn } from "@/lib/utils";
 
 /** Abstract India silhouette (stylised, not cartographic). */
@@ -12,6 +20,7 @@ const INDIA_PATH =
 
 export function LiveWorld() {
   const [filter, setFilter] = useState<"All" | ChallengeCategory>("All");
+  const [selected, setSelected] = useState<ChallengeNode | null>(null);
 
   const nodes = useMemo(
     () => (filter === "All" ? mapNodes : mapNodes.filter((n) => n.category === filter)),
@@ -19,7 +28,7 @@ export function LiveWorld() {
   );
 
   return (
-    <section id="live-world" className="relative scroll-mt-28 px-4 py-20 sm:px-6 lg:py-28">
+    <section id="live-world" className="relative scroll-mt-32 px-4 py-24 sm:px-6 lg:py-32">
       <div className="mx-auto max-w-7xl">
         <Reveal className="max-w-2xl">
           <SectionLabel>Live World</SectionLabel>
@@ -27,7 +36,8 @@ export function LiveWorld() {
             See What's Happening <span className="text-gradient">Around You.</span>
           </h2>
           <p className="mt-4 text-muted-foreground">
-            A live view of reported challenges across the country. Demo data shown for this
+            A live view of reported challenges across the country. Hover a signal for the
+            summary, select it to open the full mission dossier. Demo data shown for this
             preview.
           </p>
         </Reveal>
@@ -55,7 +65,18 @@ export function LiveWorld() {
         <div className="mt-8 grid gap-5 lg:grid-cols-[1.6fr_1fr]">
           <Reveal delay={0.15}>
             <div className="glass relative overflow-hidden rounded-3xl p-4 sm:p-6">
-              <div className="relative h-[380px] w-full overflow-hidden rounded-2xl border border-border/70 bg-background/40 grid-floor sm:h-[520px]">
+              <div className="flex items-center justify-between gap-3">
+                <span className="mono-label text-cyan/85">Signal Map · India</span>
+                <span className="flex items-center gap-1.5 font-mono text-[10px] tracking-[0.16em] text-signal/90">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-signal opacity-60 motion-safe:animate-ping" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-signal" />
+                  </span>
+                  LIVE DATA (DEMO)
+                </span>
+              </div>
+
+              <div className="relative mt-3 h-[380px] w-full overflow-hidden rounded-2xl border border-border/70 bg-background/40 grid-floor sm:h-[520px]">
                 <svg
                   viewBox="0 0 100 100"
                   preserveAspectRatio="none"
@@ -78,9 +99,16 @@ export function LiveWorld() {
                   />
                 </svg>
                 <div className="absolute inset-0">
-                  <NodeNetwork key={filter} nodes={nodes} autoLink showLabels={false} />
+                  <NodeNetwork
+                    key={filter}
+                    nodes={nodes}
+                    autoLink
+                    ambient
+                    showLabels={false}
+                    onSelect={setSelected}
+                  />
                 </div>
-                <span className="absolute bottom-3 left-4 font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
+                <span className="pointer-events-none absolute bottom-3 left-4 font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
                   {nodes.length.toString().padStart(2, "0")} SIGNALS · {filter.toUpperCase()}
                 </span>
               </div>
@@ -88,33 +116,51 @@ export function LiveWorld() {
           </Reveal>
 
           <Reveal delay={0.22}>
-            <div id="impact" className="grid h-full gap-4 sm:grid-cols-2 lg:grid-cols-1">
-              {liveStats.map((s, i) => (
-                <motion.div
-                  key={s.label}
-                  whileHover={{ y: -5 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                  className="glass glow-ring flex flex-col justify-center rounded-2xl px-5 py-5"
-                >
-                  <span className="mono-label">{s.label}</span>
-                  <span className="mt-2 font-display text-3xl font-semibold sm:text-4xl">
-                    <Counter
-                      value={s.value}
-                      decimals={"decimals" in s ? (s.decimals as number) : 0}
-                      suffix={s.suffix}
-                      duration={1400 + i * 200}
-                    />
-                  </span>
-                  <span
-                    className="mt-3 h-px w-full"
-                    style={{ backgroundImage: "var(--gradient-accent)", opacity: 0.5 }}
-                  />
-                </motion.div>
-              ))}
-            </div>
+            <LiveSignals />
           </Reveal>
         </div>
+
+        <div id="impact" className="mt-5 grid scroll-mt-32 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {liveStats.map((s, i) => (
+            <Reveal key={s.label} delay={0.08 * i}>
+              <motion.div
+                whileHover={{ y: -5 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                className="glass glow-ring flex h-full flex-col justify-center rounded-2xl px-5 py-5"
+              >
+                <span className="flex items-center justify-between gap-2">
+                  <span className="mono-label">{s.label}</span>
+                  <span className="flex items-center gap-1 font-mono text-[9px] tracking-[0.14em] text-signal/80">
+                    <span className="relative flex h-1 w-1">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-signal opacity-60 motion-safe:animate-ping" />
+                      <span className="relative inline-flex h-1 w-1 rounded-full bg-signal" />
+                    </span>
+                    LIVE
+                  </span>
+                </span>
+                <span className="mt-2 font-display text-3xl font-semibold sm:text-4xl">
+                  <Counter
+                    value={s.value}
+                    decimals={"decimals" in s ? (s.decimals as number) : 0}
+                    suffix={s.suffix}
+                    duration={1400 + i * 200}
+                  />
+                </span>
+                <span
+                  className="mt-3 h-px w-full"
+                  style={{ backgroundImage: "var(--gradient-accent)", opacity: 0.5 }}
+                />
+              </motion.div>
+            </Reveal>
+          ))}
+        </div>
+
+        <p className="mt-4 font-mono text-[10px] tracking-[0.14em] text-muted-foreground/60">
+          FIGURES SHOWN ARE DEMO DATA FOR THIS PROTOTYPE, NOT OFFICIAL GOVERNMENT STATISTICS.
+        </p>
       </div>
+
+      <ChallengePanel node={selected} onClose={() => setSelected(null)} />
     </section>
   );
 }
