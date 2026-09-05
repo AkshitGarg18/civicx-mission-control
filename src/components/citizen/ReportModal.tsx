@@ -97,6 +97,10 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
   const [error, setError] = useState<string | null>(null);
   const [received, setReceived] = useState(false);
   const [analysis, setAnalysis] = useState<AiAnalysisResult | null>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [challengeId, setChallengeId] = useState<string | null>(null);
+  const runAnalysis = useServerFn(analyzeChallenge);
+
 
   const [draft, setDraft] = useState<ReportDraft>(emptyDraft);
   const [query, setQuery] = useState("");
