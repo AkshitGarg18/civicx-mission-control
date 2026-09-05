@@ -1,24 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AmbientBackground } from "@/components/civicx/AmbientBackground";
+import { NavBar } from "@/components/civicx/NavBar";
+import { Hero } from "@/components/civicx/Hero";
+import { Forces } from "@/components/civicx/Forces";
+import { LiveWorld } from "@/components/civicx/LiveWorld";
+import { Missions } from "@/components/civicx/Missions";
+import { HowItWorks } from "@/components/civicx/HowItWorks";
+import { FinalCTA } from "@/components/civicx/FinalCTA";
+import { SiteFooter } from "@/components/civicx/SiteFooter";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+const title = "CivicX — Turn Real-World Problems Into Real-World Solutions";
+const description =
+  "CivicX connects citizens, universities, industry and government to turn societal challenges into measurable impact through a live mission-control platform.";
+
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="relative min-h-screen overflow-x-hidden">
+      <AmbientBackground />
+      <NavBar />
+      <main>
+        <Hero />
+        <Forces />
+        <LiveWorld />
+        <Missions />
+        <HowItWorks />
+        <FinalCTA />
+      </main>
+      <SiteFooter />
     </div>
   );
 }
