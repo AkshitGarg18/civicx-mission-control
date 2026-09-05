@@ -9,7 +9,22 @@ import { roleById, type RoleId } from "@/lib/civicx-roles";
 type State = "idle" | "working" | "granted" | "denied";
 
 /** ACCESS CIVICX — email + password sign-in console. */
-export function LoginForm({ role, redirect }: { role?: RoleId; redirect?: string }) {
+
+function authSearch(role?: RoleId, redirect?: string) {
+  return {
+    ...(role ? { role } : {}),
+    ...(redirect ? { redirect } : {}),
+  };
+}
+
+/** ACCESS CIVICX form body. */
+export function LoginForm({
+  role,
+  redirect,
+}: {
+  role?: RoleId | undefined;
+  redirect?: string | undefined;
+}) {
   const reduced = useReducedMotion();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -52,7 +67,7 @@ export function LoginForm({ role, redirect }: { role?: RoleId; redirect?: string
           Don&apos;t have an account?{" "}
           <Link
             to="/signup"
-            search={{ role, redirect }}
+            search={authSearch(role, redirect)}
             className="text-cyan underline-offset-4 transition-colors hover:underline"
           >
             Create one

@@ -17,7 +17,21 @@ const orgLabel: Record<RoleId, string> = {
 };
 
 /** JOIN THE CIVICX NETWORK — account creation with role selection. */
-export function SignupForm({ role: initialRole, redirect }: { role?: RoleId; redirect?: string }) {
+
+function authSearch(role?: RoleId, redirect?: string) {
+  return {
+    ...(role ? { role } : {}),
+    ...(redirect ? { redirect } : {}),
+  };
+}
+
+export function SignupForm({
+  role: initialRole,
+  redirect,
+}: {
+  role?: RoleId | undefined;
+  redirect?: string | undefined;
+}) {
   const reduced = useReducedMotion();
   const navigate = useNavigate();
 
@@ -63,7 +77,7 @@ export function SignupForm({ role: initialRole, redirect }: { role?: RoleId; red
       email,
       password,
       role,
-      institution: institution || undefined,
+      ...(institution.trim() ? { institution } : {}),
     });
 
     if (!result.ok) {
@@ -77,7 +91,7 @@ export function SignupForm({ role: initialRole, redirect }: { role?: RoleId; red
       setMessage(
         "Account created. Check your inbox for the confirmation link, then sign in.",
       );
-      setTimeout(() => void navigate({ to: "/login", search: { role, redirect } }), 2200);
+      setTimeout(() => void navigate({ to: "/login", search: authSearch(role, redirect) }), 2200);
       return;
     }
 
@@ -99,7 +113,7 @@ export function SignupForm({ role: initialRole, redirect }: { role?: RoleId; red
           Already have an account?{" "}
           <Link
             to="/login"
-            search={{ role, redirect }}
+            search={authSearch(role, redirect)}
             className="text-cyan underline-offset-4 transition-colors hover:underline"
           >
             Sign in
@@ -167,7 +181,7 @@ export function SignupForm({ role: initialRole, redirect }: { role?: RoleId; red
                           boxShadow: `0 0 26px -10px ${r.accent}`,
                           backgroundColor: `color-mix(in oklab, ${r.accent} 8%, transparent)`,
                         }
-                      : undefined
+                      : {}
                   }
                 >
                   <span
@@ -182,7 +196,7 @@ export function SignupForm({ role: initialRole, redirect }: { role?: RoleId; red
                   <span className="min-w-0">
                     <span
                       className="block font-mono text-[11px] tracking-[0.2em]"
-                      style={{ color: active ? r.accent : undefined }}
+                      style={active ? { color: r.accent } : {}}
                     >
                       {r.title}
                     </span>

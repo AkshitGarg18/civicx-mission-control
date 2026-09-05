@@ -12,7 +12,7 @@ export interface SignUpInput {
   email: string;
   password: string;
   role: RoleId;
-  institution?: string;
+  institution?: string | undefined;
 }
 
 export interface AuthOutcome {

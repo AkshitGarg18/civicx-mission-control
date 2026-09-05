@@ -19,7 +19,7 @@ export function AuthShell({
   heading: ReactNode;
   subtitle: string;
   children: ReactNode;
-  footer?: ReactNode;
+  footer?: ReactNode | undefined;
   wide?: boolean;
 }) {
   const reduced = useReducedMotion();
@@ -124,8 +124,8 @@ export function AuthField({
   type?: string;
   value: string;
   onChange: (v: string) => void;
-  placeholder?: string;
-  autoComplete?: string;
+  placeholder?: string | undefined;
+  autoComplete?: string | undefined;
   optional?: boolean;
 }) {
   return (
@@ -152,7 +152,7 @@ export function AuthStatus({
   message,
 }: {
   state: "idle" | "working" | "granted" | "denied";
-  message?: string;
+  message?: string | undefined;
 }) {
   if (state === "idle" && !message) return null;
 
