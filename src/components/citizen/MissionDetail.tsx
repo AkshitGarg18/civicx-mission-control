@@ -160,6 +160,34 @@ export function MissionDetail({
                     </Block>
                   )}
 
+                  {row.affected_stakeholders && row.affected_stakeholders.length > 0 && (
+                    <Block label="AFFECTED STAKEHOLDERS">
+                      <div className="flex flex-wrap gap-2">
+                        {row.affected_stakeholders.map((s) => (
+                          <span
+                            key={s}
+                            className="rounded-lg border border-violet/30 bg-violet/5 px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-violet"
+                          >
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </Block>
+                  )}
+
+                  {row.solution_directions && row.solution_directions.length > 0 && (
+                    <Block label="SOLUTION DIRECTIONS">
+                      <ul className="space-y-2">
+                        {row.solution_directions.map((d) => (
+                          <li key={d} className="flex gap-2.5 text-sm text-foreground/85">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan/80" />
+                            <span className="leading-relaxed">{d}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </Block>
+                  )}
+
                   <Block label="EVIDENCE">
                     {evidence.length === 0 ? (
                       <p className="text-sm text-muted-foreground">No files attached.</p>

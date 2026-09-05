@@ -13,9 +13,11 @@ import { CategoryDot, PriorityChip, StatusChip } from "./StatusChip";
 export function ChallengePanel({
   node,
   onClose,
+  onViewMission,
 }: {
   node: ChallengeNode | null;
   onClose: () => void;
+  onViewMission?: ((node: ChallengeNode) => void) | undefined;
 }) {
   const reduced = useReducedMotion();
 
@@ -85,9 +87,9 @@ export function ChallengePanel({
             <dl className="mt-6 grid grid-cols-2 gap-3">
               {[
                 { k: "Category", v: node.category },
-                { k: "People affected", v: node.affected },
+                ...(node.affected ? [{ k: "Estimated impact", v: node.affected }] : []),
                 { k: "Priority", v: node.priority },
-                { k: "AI confidence", v: `${node.confidence}%` },
+                ...(node.confidence ? [{ k: "AI confidence", v: `${node.confidence}%` }] : []),
               ].map((row) => (
                 <div key={row.k} className="glass-soft rounded-2xl px-4 py-3">
                   <dt className="mono-label">{row.k}</dt>
@@ -116,6 +118,36 @@ export function ChallengePanel({
                 ))}
               </div>
             </section>
+
+            {node.stakeholders && node.stakeholders.length > 0 && (
+              <section className="mt-6">
+                <span className="mono-label text-violet/85">Affected stakeholders</span>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {node.stakeholders.map((s) => (
+                    <span
+                      key={s}
+                      className="rounded-lg border border-violet/25 bg-violet/8 px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-violet/90"
+                    >
+                      {s.toUpperCase()}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {node.directions && node.directions.length > 0 && (
+              <section className="mt-6">
+                <span className="mono-label">Solution directions</span>
+                <ul className="mt-3 space-y-2">
+                  {node.directions.map((d) => (
+                    <li key={d} className="flex gap-2.5 text-sm text-muted-foreground">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan/80" />
+                      <span className="leading-relaxed">{d}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             <section className="mt-7">
               <span className="mono-label">Lifecycle</span>
@@ -157,9 +189,21 @@ export function ChallengePanel({
               </div>
             </section>
 
-            <p className="mt-8 font-mono text-[10px] leading-relaxed tracking-[0.12em] text-muted-foreground/70">
-              DEMO DATA — SHOWN FOR THIS PROTOTYPE PREVIEW
-            </p>
+            {node.live && onViewMission && (
+              <button
+                type="button"
+                onClick={() => onViewMission(node)}
+                className="mt-8 inline-flex items-center gap-2 self-start rounded-xl border border-cyan/35 bg-cyan/8 px-4 py-2.5 font-mono text-[10px] tracking-[0.18em] text-cyan transition-colors hover:border-cyan/60 hover:text-foreground"
+              >
+                VIEW MISSION →
+              </button>
+            )}
+
+            {!node.live && (
+              <p className="mt-8 font-mono text-[10px] leading-relaxed tracking-[0.12em] text-muted-foreground/70">
+                DEMO DATA — SHOWN FOR THIS PROTOTYPE PREVIEW
+              </p>
+            )}
           </motion.aside>
         </div>
       )}

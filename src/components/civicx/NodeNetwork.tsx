@@ -15,6 +15,8 @@ interface NodeNetworkProps {
   ambient?: boolean;
   /** called when a node is clicked */
   onSelect?: (node: ChallengeNode) => void;
+  /** ids of nodes that just arrived — they get an extra arrival ring */
+  arriving?: string[];
   className?: string;
 }
 
@@ -37,6 +39,7 @@ export function NodeNetwork({
   showLabels = true,
   ambient = false,
   onSelect,
+  arriving,
   className,
 }: NodeNetworkProps) {
   const [active, setActive] = useState<string | null>(null);
@@ -190,6 +193,7 @@ export function NodeNetwork({
         const flipLeft = node.x > 58;
         const flipUp = node.y > 60;
         const scale = priorityScale[node.priority];
+        const isNew = arriving?.includes(node.id) ?? false;
 
         return (
           <div
@@ -208,7 +212,7 @@ export function NodeNetwork({
               initial={{ opacity: 0, scale: 0.4 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.05 * i }}
+              transition={{ duration: 0.5, delay: isNew ? 0 : 0.05 * i }}
               className="relative grid h-7 w-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-cyan/60"
             >
               <span
@@ -223,6 +227,15 @@ export function NodeNetwork({
                     : `pulse-node ${2.2 + (i % 4) * 0.55}s ease-in-out infinite`,
                 }}
               />
+              {isNew && !reduced && (
+                <motion.span
+                  className="pointer-events-none absolute rounded-full border"
+                  style={{ borderColor: accent }}
+                  initial={{ height: "0.6rem", width: "0.6rem", opacity: 0.9 }}
+                  animate={{ height: "4.5rem", width: "4.5rem", opacity: 0 }}
+                  transition={{ duration: 1.8, repeat: 3, ease: "easeOut" }}
+                />
+              )}
               <span
                 className="rounded-full transition-transform duration-300"
                 style={{
@@ -274,10 +287,12 @@ export function NodeNetwork({
                     <dt className="text-muted-foreground">Location</dt>
                     <dd className="font-mono text-foreground/85">{node.location}</dd>
                   </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <dt className="text-muted-foreground">People affected</dt>
-                    <dd className="font-mono text-foreground/85">{node.affected}</dd>
-                  </div>
+                  {node.affected && (
+                    <div className="flex items-center justify-between gap-3">
+                      <dt className="text-muted-foreground">Estimated impact</dt>
+                      <dd className="font-mono text-foreground/85">{node.affected}</dd>
+                    </div>
+                  )}
                 </dl>
 
                 <div className="mt-3 border-t border-border/60 pt-2.5">
