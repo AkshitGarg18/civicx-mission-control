@@ -1,0 +1,584 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Crosshair,
+  FileText,
+  Film,
+  Image as ImageIcon,
+  MapPin,
+  Search,
+  Send,
+  Trash2,
+  UploadCloud,
+  X,
+} from "lucide-react";
+import {
+  currentLocation,
+  mockLocations,
+  reportCategories,
+  reportCategoryAccent,
+  type MockLocation,
+  type ReportCategory,
+} from "@/lib/citizen-data";
+import { AiAnalysis } from "./AiAnalysis";
+import { cn } from "@/lib/utils";
+
+const steps = [
+  { no: "01", key: "IDENTIFY", heading: "What's happening?" },
+  { no: "02", key: "LOCATION", heading: "Where is it happening?" },
+  { no: "03", key: "EVIDENCE", heading: "Provide evidence" },
+  { no: "04", key: "REVIEW", heading: "Review your mission" },
+] as const;
+
+const MAX_DESC = 600;
+
+interface Evidence {
+  id: string;
+  name: string;
+  kind: "photo" | "video" | "document";
+  size: string;
+}
+
+/** Draft report — mirrors the shape a Supabase insert will take later. */
+export interface ReportDraft {
+  title: string;
+  description: string;
+  category: ReportCategory | null;
+  location: MockLocation | null;
+  evidence: Evidence[];
+}
+
+const emptyDraft: ReportDraft = {
+  title: "",
+  description: "",
+  category: null,
+  location: null,
+  evidence: [],
+};
+
+function kindFor(file: File): Evidence["kind"] {
+  if (file.type.startsWith("image/")) return "photo";
+  if (file.type.startsWith("video/")) return "video";
+  return "document";
+}
+
+const kindIcon = { photo: ImageIcon, video: Film, document: FileText } as const;
+
+export function ReportModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const reduced = useReducedMotion();
+  const [step, setStep] = useState(0);
+  const [phase, setPhase] = useState<"form" | "transmit" | "analysis">("form");
+  const [draft, setDraft] = useState<ReportDraft>(emptyDraft);
+  const [query, setQuery] = useState("");
+  const [dragging, setDragging] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
+
+  const reset = () => {
+    setStep(0);
+    setPhase("form");
+    setDraft(emptyDraft);
+    setQuery("");
+  };
+
+  const finish = () => {
+    onClose();
+    setTimeout(reset, 350);
+  };
+
+  const results = useMemo(
+    () =>
+      query.trim().length === 0
+        ? mockLocations
+        : mockLocations.filter((l) =>
+            `${l.label} ${l.area}`.toLowerCase().includes(query.trim().toLowerCase()),
+          ),
+    [query],
+  );
+
+  const canAdvance =
+    step === 0
+      ? draft.title.trim().length > 2 && draft.description.trim().length > 9 && !!draft.category
+      : step === 1
+        ? !!draft.location
+        : true;
+
+  const addFiles = (files: FileList | null) => {
+    if (!files) return;
+    const next: Evidence[] = Array.from(files).map((f) => ({
+      id: `${f.name}-${f.size}-${Math.random().toString(36).slice(2, 7)}`,
+      name: f.name,
+      kind: kindFor(f),
+      size: `${Math.max(1, Math.round(f.size / 1024))} KB`,
+    }));
+    setDraft((d) => ({ ...d, evidence: [...d.evidence, ...next] }));
+  };
+
+  const transmit = () => {
+    setPhase("transmit");
+    setTimeout(() => setPhase("analysis"), reduced ? 200 : 1800);
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-[80] overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 bg-background/85 backdrop-blur-md"
+          />
+
+          <motion.div
+            role="dialog"
+            aria-label="Report a challenge"
+            initial={reduced ? { opacity: 0 } : { opacity: 0, y: 32, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.98 }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            className="relative mx-auto my-6 w-[min(56rem,calc(100%-1.5rem))]"
+          >
+            <div className="glass grid-floor relative overflow-hidden rounded-[1.75rem] p-5 sm:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="mono-label text-cyan/90">
+                    CIVICX // {phase === "form" ? `STEP ${steps[step]!.no} — ${steps[step]!.key}` : "SIGNAL TRANSMISSION"}
+                  </p>
+                  <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">
+                    {phase === "form" ? steps[step]!.heading : phase === "transmit" ? "Transmitting…" : "Signal received"}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Close report flow"
+                  className="rounded-xl border border-border p-2 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {phase === "form" && (
+                <>
+                  {/* step rail */}
+                  <div className="mt-6 flex items-center gap-2">
+                    {steps.map((s, i) => (
+                      <div key={s.key} className="flex flex-1 items-center gap-2">
+                        <span
+                          className={cn(
+                            "font-mono text-[9px] tracking-[0.14em]",
+                            i <= step ? "text-cyan" : "text-muted-foreground/60",
+                          )}
+                        >
+                          {s.no}
+                        </span>
+                        <span className="relative h-px flex-1 bg-border">
+                          <motion.span
+                            className="absolute inset-y-0 left-0 block"
+                            style={{ backgroundImage: "var(--gradient-accent)" }}
+                            animate={{ width: i < step ? "100%" : i === step ? "45%" : "0%" }}
+                            transition={{ duration: reduced ? 0 : 0.5, ease: [0.16, 1, 0.3, 1] }}
+                          />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={step}
+                      initial={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={reduced ? { opacity: 0 } : { opacity: 0, x: -24 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                      className="mt-7"
+                    >
+                      {step === 0 && (
+                        <div className="space-y-5">
+                          <Field label="CHALLENGE TITLE">
+                            <input
+                              value={draft.title}
+                              onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
+                              placeholder="Waste overflow near Rohini Sector 7"
+                              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
+                            />
+                          </Field>
+
+                          <Field
+                            label="DESCRIPTION"
+                            hint={`${draft.description.length} / ${MAX_DESC}`}
+                          >
+                            <textarea
+                              value={draft.description}
+                              maxLength={MAX_DESC}
+                              rows={5}
+                              onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
+                              placeholder="Describe what you see, how often it happens and who it affects."
+                              className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
+                            />
+                          </Field>
+
+                          <div>
+                            <p className="mono-label text-muted-foreground">CATEGORY</p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {reportCategories.map((c) => {
+                                const active = draft.category === c;
+                                const accent = reportCategoryAccent[c];
+                                return (
+                                  <button
+                                    key={c}
+                                    type="button"
+                                    onClick={() => setDraft((d) => ({ ...d, category: c }))}
+                                    className={cn(
+                                      "rounded-xl border px-3 py-2 font-mono text-[10px] tracking-[0.14em] transition-colors",
+                                      active
+                                        ? "text-foreground"
+                                        : "border-border text-muted-foreground hover:text-foreground",
+                                    )}
+                                    style={
+                                      active
+                                        ? {
+                                            borderColor: `color-mix(in oklab, ${accent} 50%, transparent)`,
+                                            backgroundColor: `color-mix(in oklab, ${accent} 12%, transparent)`,
+                                          }
+                                        : undefined
+                                    }
+                                  >
+                                    <span
+                                      className="mr-2 inline-block h-1.5 w-1.5 rounded-full align-middle"
+                                      style={{ backgroundColor: accent }}
+                                    />
+                                    {c.toUpperCase()}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {step === 1 && (
+                        <div className="space-y-5">
+                          <div className="glass-soft flex items-center gap-3 rounded-xl px-3 py-2.5">
+                            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            <input
+                              value={query}
+                              onChange={(e) => setQuery(e.target.value)}
+                              placeholder="Search a location…"
+                              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDraft((d) => ({ ...d, location: currentLocation }));
+                                setQuery("");
+                              }}
+                              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-cyan/30 bg-cyan/10 px-2.5 py-1.5 font-mono text-[10px] tracking-[0.14em] text-cyan"
+                            >
+                              <Crosshair className="h-3.5 w-3.5" />
+                              CURRENT
+                            </button>
+                          </div>
+
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {results.map((l) => {
+                              const active = draft.location?.label === l.label;
+                              return (
+                                <button
+                                  key={l.label}
+                                  type="button"
+                                  onClick={() => setDraft((d) => ({ ...d, location: l }))}
+                                  className={cn(
+                                    "flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors",
+                                    active
+                                      ? "border-cyan/40 bg-cyan/10"
+                                      : "border-border hover:border-cyan/30",
+                                  )}
+                                >
+                                  <MapPin className={cn("h-4 w-4 shrink-0", active ? "text-cyan" : "text-muted-foreground")} />
+                                  <span className="min-w-0">
+                                    <span className="block truncate font-mono text-[11px] tracking-[0.14em]">
+                                      {l.label}
+                                    </span>
+                                    <span className="block truncate text-xs text-muted-foreground">{l.area}</span>
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          <div className="grid-floor glass-soft relative overflow-hidden rounded-xl p-5">
+                            <span
+                              className="pointer-events-none absolute inset-0 opacity-40"
+                              style={{ backgroundImage: "var(--gradient-hero)" }}
+                            />
+                            <div className="relative flex items-center justify-between gap-4">
+                              <div>
+                                <p className="mono-label text-cyan/90">SELECTED COORDINATES</p>
+                                <p className="mt-2 font-mono text-sm tracking-[0.18em]">
+                                  {draft.location?.label ?? "AWAITING SELECTION"}
+                                </p>
+                                <p className="mt-1 font-mono text-xs text-muted-foreground">
+                                  {draft.location ? `${draft.location.lat}  ${draft.location.lng}` : "—"}
+                                </p>
+                              </div>
+                              <span className="relative flex h-10 w-10 items-center justify-center">
+                                <span className="absolute h-10 w-10 rounded-full border border-cyan/30 motion-safe:animate-ping" />
+                                <span className="h-2 w-2 rounded-full bg-cyan shadow-[0_0_12px_var(--neon-cyan)]" />
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {step === 2 && (
+                        <div className="space-y-4">
+                          <div
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              setDragging(true);
+                            }}
+                            onDragLeave={() => setDragging(false)}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              setDragging(false);
+                              addFiles(e.dataTransfer.files);
+                            }}
+                            className={cn(
+                              "rounded-2xl border border-dashed px-6 py-10 text-center transition-colors",
+                              dragging ? "border-cyan/60 bg-cyan/5" : "border-border",
+                            )}
+                          >
+                            <UploadCloud className="mx-auto h-7 w-7 text-cyan" />
+                            <p className="mt-3 text-sm">Drag photos, video or documents here</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              Evidence stays on this device in the demo build.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => fileInput.current?.click()}
+                              className="mt-4 rounded-xl border border-cyan/30 bg-cyan/10 px-4 py-2 font-mono text-[10px] tracking-[0.16em] text-cyan"
+                            >
+                              BROWSE FILES
+                            </button>
+                            <input
+                              ref={fileInput}
+                              type="file"
+                              multiple
+                              className="hidden"
+                              onChange={(e) => addFiles(e.target.files)}
+                            />
+                          </div>
+
+                          {draft.evidence.length > 0 && (
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              {draft.evidence.map((f) => {
+                                const Icon = kindIcon[f.kind];
+                                return (
+                                  <motion.div
+                                    key={f.id}
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="glass-soft flex items-center gap-3 rounded-xl px-3 py-2.5"
+                                  >
+                                    <Icon className="h-4 w-4 shrink-0 text-cyan" />
+                                    <span className="min-w-0 flex-1">
+                                      <span className="block truncate text-sm">{f.name}</span>
+                                      <span className="block font-mono text-[10px] tracking-[0.14em] text-muted-foreground">
+                                        {f.kind.toUpperCase()} • {f.size}
+                                      </span>
+                                    </span>
+                                    <button
+                                      type="button"
+                                      aria-label={`Remove ${f.name}`}
+                                      onClick={() =>
+                                        setDraft((d) => ({
+                                          ...d,
+                                          evidence: d.evidence.filter((x) => x.id !== f.id),
+                                        }))
+                                      }
+                                      className="text-muted-foreground transition-colors hover:text-destructive"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  </motion.div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {step === 3 && (
+                        <div className="space-y-3">
+                          <Summary label="MISSION TITLE" value={draft.title || "—"} />
+                          <Summary label="CATEGORY" value={draft.category ?? "—"} />
+                          <Summary
+                            label="LOCATION"
+                            value={
+                              draft.location
+                                ? `${draft.location.label} · ${draft.location.lat} ${draft.location.lng}`
+                                : "—"
+                            }
+                          />
+                          <Summary label="DESCRIPTION" value={draft.description || "—"} />
+                          <Summary
+                            label="EVIDENCE"
+                            value={
+                              draft.evidence.length
+                                ? draft.evidence.map((f) => f.name).join(", ")
+                                : "No files attached"
+                            }
+                          />
+
+                          <div className="pt-4 text-center">
+                            <p className="font-mono text-sm tracking-[0.18em] text-cyan">
+                              Ready to transmit?
+                            </p>
+                            <motion.button
+                              type="button"
+                              onClick={transmit}
+                              whileHover={reduced ? {} : { y: -2 }}
+                              whileTap={{ scale: 0.98 }}
+                              className="mt-4 inline-flex items-center gap-2 rounded-xl px-6 py-3 font-mono text-[11px] font-semibold tracking-[0.18em] text-background motion-reduce:transform-none"
+                              style={{ backgroundImage: "var(--gradient-accent)" }}
+                            >
+                              TRANSMIT CHALLENGE
+                              <ArrowRight className="h-4 w-4" />
+                            </motion.button>
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+
+                  {step < 3 && (
+                    <div className="mt-8 flex items-center justify-between gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setStep((s) => Math.max(0, s - 1))}
+                        disabled={step === 0}
+                        className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 font-mono text-[10px] tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
+                      >
+                        <ArrowLeft className="h-3.5 w-3.5" />
+                        BACK
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => canAdvance && setStep((s) => Math.min(3, s + 1))}
+                        disabled={!canAdvance}
+                        className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-mono text-[10px] font-semibold tracking-[0.16em] text-background disabled:opacity-40"
+                        style={{ backgroundImage: "var(--gradient-accent)" }}
+                      >
+                        CONTINUE
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+                  {step === 3 && (
+                    <div className="mt-6">
+                      <button
+                        type="button"
+                        onClick={() => setStep(2)}
+                        className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 font-mono text-[10px] tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        <ArrowLeft className="h-3.5 w-3.5" />
+                        BACK
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {phase === "transmit" && (
+                <div className="grid place-items-center py-16">
+                  <span className="relative grid h-24 w-24 place-items-center">
+                    <motion.span
+                      className="absolute inset-0 rounded-full border border-cyan/40"
+                      animate={reduced ? {} : { scale: [1, 1.6], opacity: [0.8, 0] }}
+                      transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
+                    />
+                    <motion.span
+                      className="absolute inset-0 rounded-full border border-violet/40"
+                      animate={reduced ? {} : { scale: [1, 1.9], opacity: [0.6, 0] }}
+                      transition={{ duration: 1.2, repeat: Infinity, delay: 0.35, ease: "easeOut" }}
+                    />
+                    <span
+                      className="grid h-14 w-14 place-items-center rounded-full text-background"
+                      style={{ backgroundImage: "var(--gradient-accent)" }}
+                    >
+                      <Send className="h-5 w-5" />
+                    </span>
+                  </span>
+                  <p className="mt-8 font-mono text-[11px] tracking-[0.28em] text-cyan">
+                    TRANSMITTING CIVIC SIGNAL
+                  </p>
+                  <p className="mt-2 font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
+                    ROUTING TO CIVICX INTELLIGENCE
+                  </p>
+                </div>
+              )}
+
+              {phase === "analysis" && (
+                <div className="mt-8">
+                  <AiAnalysis onCreateMission={finish} />
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="flex items-center justify-between">
+        <span className="mono-label text-muted-foreground">{label}</span>
+        {hint && (
+          <span className="font-mono text-[10px] tracking-[0.14em] text-muted-foreground/70">
+            {hint}
+          </span>
+        )}
+      </span>
+      <span className="glass-soft mt-2 block rounded-xl px-3 py-2.5 focus-within:border-cyan/40">
+        {children}
+      </span>
+    </label>
+  );
+}
+
+function Summary({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="glass-soft rounded-xl px-4 py-3">
+      <p className="mono-label text-muted-foreground">{label}</p>
+      <p className="mt-1.5 text-sm leading-relaxed text-foreground/90">{value}</p>
+    </div>
+  );
+}
