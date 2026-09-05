@@ -207,19 +207,12 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
         );
       }
 
-      // TEMPORARY: local placeholder analysis, replaced by Gemini later.
-      const mock = analyseChallenge({
-        title: draft.title.trim(),
-        description: draft.description.trim(),
-        category: draft.category,
-        locationName: draft.location?.label ?? null,
-      });
-      await applyChallengeAnalysis(challenge.id, mock);
-      setAnalysis(toAnalysisResult(mock, challenge.id));
-
+      setChallengeId(challenge.id);
       window.dispatchEvent(new Event(CHALLENGE_CREATED_EVENT));
       setReceived(true);
       setTimeout(() => setPhase("analysis"), reduced ? 150 : 900);
+      void analyse(challenge.id);
+
     } catch (err) {
       console.error("[civicx] challenge transmission failed", err);
       setError(
