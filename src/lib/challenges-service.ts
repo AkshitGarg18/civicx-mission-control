@@ -10,7 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { MissionStatus, Priority } from "@/lib/civicx-data";
 import type { CitizenMission } from "@/lib/citizen-data";
-import type { ChallengeAnalysis } from "@/lib/mock-analysis";
 
 export type ChallengeRow = Database["public"]["Tables"]["challenges"]["Row"];
 export type ChallengeStatusRow =
@@ -80,43 +79,6 @@ export async function createChallenge(input: NewChallenge): Promise<ChallengeRow
     });
 
   if (history.error) throw history.error;
-
-  return data;
-}
-
-/**
- * Writes the placeholder analysis onto the stored challenge so the database
- * holds a complete record. Replace the caller's analysis source with Gemini
- * output later — this function stays as is.
- */
-export async function applyChallengeAnalysis(
-  challengeId: string,
-  analysis: ChallengeAnalysis,
-): Promise<ChallengeRow> {
-  await requireUserId();
-
-  const { data, error } = await supabase
-    .from("challenges")
-    .update({
-      category: analysis.category,
-      priority: analysis.priority,
-      ai_confidence: analysis.aiConfidence,
-      estimated_impact: analysis.estimatedImpact,
-      ai_summary: analysis.aiSummary,
-      recommended_skills: analysis.recommendedSkills,
-      status: "AI ANALYSIS",
-    })
-    .eq("id", challengeId)
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  await supabase.from("challenge_status_history").insert({
-    challenge_id: challengeId,
-    status: "AI ANALYSIS",
-    message: "Automated analysis completed",
-  });
 
   return data;
 }
@@ -249,6 +211,9 @@ export async function getChallengeEvidence(challengeId: string): Promise<Evidenc
 
 const statusMap: Record<string, MissionStatus> = {
   REPORTED: "SIGNAL DETECTED",
+  AI_ANALYSIS: "SIGNAL DETECTED",
+  AI_ANALYSIS_FAILED: "SIGNAL DETECTED",
+  AI_ANALYSIS_COMPLETE: "AI ANALYSIS COMPLETE",
   "AI ANALYSIS": "AI ANALYSIS COMPLETE",
   MATCHING: "MATCHING IN PROGRESS",
   COLLABORATION: "MISSION ACTIVE",
