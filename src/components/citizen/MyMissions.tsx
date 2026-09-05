@@ -67,6 +67,24 @@ function MissionRow({ mission, index }: { mission: CitizenMission; index: number
 
 /** The citizen's own reported missions with lifecycle timelines. */
 export function MyMissions() {
+  const [missions, setMissions] = useState<CitizenMission[]>(myMissions);
+
+  useEffect(() => {
+    let cancelled = false;
+    getMyChallenges()
+      .then((rows) => {
+        if (cancelled || rows.length === 0) return;
+        // Live rows first; demo missions stay visible until auth + real data land.
+        setMissions([...rows.map(toCitizenMission), ...myMissions]);
+      })
+      .catch(() => {
+        /* demo data stays on screen if the backend is unreachable */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <section id="missions" className="scroll-mt-24">
       <Reveal className="flex flex-wrap items-end justify-between gap-3">
@@ -77,15 +95,16 @@ export function MyMissions() {
           </p>
         </div>
         <span className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">
-          {myMissions.length} TRACKED
+          {missions.length} TRACKED
         </span>
       </Reveal>
 
       <div className="mt-6 grid gap-4">
-        {myMissions.map((m, i) => (
+        {missions.map((m, i) => (
           <MissionRow key={m.id} mission={m} index={i} />
         ))}
       </div>
     </section>
   );
 }
+
