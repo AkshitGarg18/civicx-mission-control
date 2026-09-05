@@ -128,7 +128,27 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
     setError(null);
     setReceived(false);
     setAnalysis(null);
+    setAnalysisError(null);
+    setChallengeId(null);
   };
+
+  /** Runs the server-side AI analysis for a stored challenge. */
+  const analyse = async (id: string) => {
+    setAnalysis(null);
+    setAnalysisError(null);
+    try {
+      const result = await runAnalysis({ data: { challengeId: id } });
+      setAnalysis(toAnalysisResult(result, id));
+      window.dispatchEvent(new Event(CHALLENGE_CREATED_EVENT));
+    } catch (err) {
+      console.error("[civicx] ai analysis failed", err);
+      setAnalysisError(
+        "Your challenge was saved, but AI analysis could not be completed. You can retry.",
+      );
+      window.dispatchEvent(new Event(CHALLENGE_CREATED_EVENT));
+    }
+  };
+
 
 
   const finish = () => {
