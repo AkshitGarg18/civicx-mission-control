@@ -53,8 +53,11 @@ export function LoginForm({
     }
 
     setState("granted");
-    const target = result.role ? roleById[result.role].to : "/citizen";
-    setTimeout(() => void navigate({ to: target, replace: true }), reduced ? 60 : 700);
+    const safeRedirect =
+      redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : undefined;
+    const target = safeRedirect ?? (result.role ? roleById[result.role].to : "/citizen");
+    setTimeout(() => void navigate({ href: target, replace: true }), reduced ? 60 : 700);
+
   };
 
   return (
