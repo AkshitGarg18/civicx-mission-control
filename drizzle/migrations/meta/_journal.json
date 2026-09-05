@@ -8,6 +8,13 @@
       "when": 1788614868189,
       "tag": "0000_civicx_core_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788614895094,
+      "tag": "0001_challenge_evidence_storage_policies",
+      "breakpoints": true
     }
   ]
 }
