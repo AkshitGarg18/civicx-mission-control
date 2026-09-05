@@ -22,6 +22,8 @@ const priorityScale: Record<ChallengeNode["priority"], number> = {
   CRITICAL: 1.25,
   HIGH: 1,
   MEDIUM: 0.8,
+  LOW: 0.7,
+
 };
 
 /**
