@@ -10,28 +10,8 @@ import { statusMap } from "@/lib/challenges-service";
 const DEFAULT_CENTER: [number, number] = [77.1025, 28.7041];
 const DEFAULT_ZOOM = 10.5;
 
-/** Dark raster basemap with real roads, streets and neighbourhoods, no API token required. */
-const DARK_STYLE: maplibregl.StyleSpecification = {
-  version: 8,
-  sources: {
-    carto: {
-      type: "raster",
-      tiles: [
-        "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-        "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-        "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-      ],
-      tileSize: 256,
-      maxzoom: 19,
-      attribution:
-        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions">CARTO</a>',
-    },
-  },
-  layers: [
-    { id: "background", type: "background", paint: { "background-color": "#05070d" } },
-    { id: "carto", type: "raster", source: "carto", paint: { "raster-opacity": 0.92 } },
-  ],
-};
+/** Free, keyless dark vector basemap (OpenFreeMap / OpenStreetMap data). */
+const DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
 
 const priorityStyle: Record<string, { color: string; ring: number; pulse: string }> = {
   CRITICAL: { color: "var(--destructive)", ring: 20, pulse: "civicx-pulse-strong" },
