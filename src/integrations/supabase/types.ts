@@ -154,6 +154,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          bio: string | null
+          course: string | null
           created_at: string
           email: string | null
           id: string
@@ -161,8 +163,11 @@ export type Database = {
           name: string | null
           role: string
           skills: string[] | null
+          year: string | null
         }
         Insert: {
+          bio?: string | null
+          course?: string | null
           created_at?: string
           email?: string | null
           id: string
@@ -170,8 +175,11 @@ export type Database = {
           name?: string | null
           role?: string
           skills?: string[] | null
+          year?: string | null
         }
         Update: {
+          bio?: string | null
+          course?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -179,8 +187,99 @@ export type Database = {
           name?: string | null
           role?: string
           skills?: string[] | null
+          year?: string | null
         }
         Relationships: []
+      }
+      team_members: {
+        Row: {
+          contribution_area: string | null
+          id: string
+          is_leader: boolean
+          joined_at: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          contribution_area?: string | null
+          id?: string
+          is_leader?: boolean
+          joined_at?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          contribution_area?: string | null
+          id?: string
+          is_leader?: boolean
+          joined_at?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          mission_id: string
+          skill_coverage: number | null
+          status: string
+          team_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          mission_id: string
+          skill_coverage?: number | null
+          status?: string
+          team_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          mission_id?: string
+          skill_coverage?: number | null
+          status?: string
+          team_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -189,6 +288,14 @@ export type Database = {
     Functions: {
       has_civic_role: {
         Args: { _role: string; _user_id: string }
+        Returns: boolean
+      }
+      is_team_member: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_team_owner: {
+        Args: { _team_id: string; _user_id: string }
         Returns: boolean
       }
     }

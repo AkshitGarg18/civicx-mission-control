@@ -24,6 +24,9 @@ export interface CivicProfile {
   role: RoleId;
   institution: string | null;
   skills: string[] | null;
+  course: string | null;
+  year: string | null;
+  bio: string | null;
 }
 
 interface AuthValue {
@@ -53,6 +56,9 @@ function metadataProfile(user: User): CivicProfile {
     institution:
       typeof meta["institution"] === "string" ? (meta["institution"] as string) : null,
     skills: null,
+    course: null,
+    year: null,
+    bio: null,
   };
 }
 
@@ -66,7 +72,7 @@ export async function ensureProfile(user: User): Promise<CivicProfile> {
 
   const existing = await supabase
     .from("profiles")
-    .select("id, name, email, role, institution, skills")
+    .select("id, name, email, role, institution, skills, course, year, bio")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -78,6 +84,9 @@ export async function ensureProfile(user: User): Promise<CivicProfile> {
       role: normaliseRole(existing.data.role),
       institution: existing.data.institution,
       skills: existing.data.skills,
+      course: existing.data.course,
+      year: existing.data.year,
+      bio: existing.data.bio,
     };
   }
 
@@ -93,7 +102,7 @@ export async function ensureProfile(user: User): Promise<CivicProfile> {
       },
       { onConflict: "id" },
     )
-    .select("id, name, email, role, institution, skills")
+    .select("id, name, email, role, institution, skills, course, year, bio")
     .maybeSingle();
 
   if (inserted.data) {
@@ -104,6 +113,9 @@ export async function ensureProfile(user: User): Promise<CivicProfile> {
       role: normaliseRole(inserted.data.role),
       institution: inserted.data.institution,
       skills: inserted.data.skills,
+      course: inserted.data.course,
+      year: inserted.data.year,
+      bio: inserted.data.bio,
     };
   }
 

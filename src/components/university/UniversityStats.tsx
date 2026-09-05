@@ -2,6 +2,8 @@ import { motion, useReducedMotion } from "motion/react";
 import { Counter } from "@/components/civicx/Counter";
 import { Reveal, SectionLabel } from "@/components/civicx/Reveal";
 import type { ChallengeRow } from "@/lib/challenges-service";
+import { scoreStudent, type TeamWithMembers } from "@/lib/teams-service";
+import { useAuth } from "@/lib/auth-context";
 
 interface StatCard {
   label: string;
@@ -17,11 +19,34 @@ interface StatCard {
 export function UniversityStats({
   rows,
   loaded,
+  teams,
 }: {
   rows: ChallengeRow[];
   loaded: boolean;
+  teams: TeamWithMembers[];
 }) {
   const reduced = useReducedMotion();
+  const { currentProfile } = useAuth();
+  const mySkills = currentProfile?.skills ?? [];
+
+  /** Missions where at least one recommended skill overlaps your own skills. */
+  const matched =
+    mySkills.length === 0
+      ? null
+      : rows.filter((r) => {
+          const scored = scoreStudent(
+            {
+              id: "self",
+              name: null,
+              institution: null,
+              course: null,
+              year: null,
+              skills: mySkills,
+            },
+            r.recommended_skills,
+          );
+          return (scored.matchPercent ?? 0) > 0;
+        }).length;
 
   const highImpact = rows.filter(
     (r) => r.priority === "HIGH" || r.priority === "CRITICAL",
@@ -42,15 +67,18 @@ export function UniversityStats({
     },
     {
       label: "MATCHED OPPORTUNITIES",
-      value: null,
+      value: loaded ? matched : null,
       accent: "var(--neon-violet)",
-      caption: "awaiting university profile matching",
+      caption:
+        mySkills.length === 0
+          ? "complete your skill profile to match missions"
+          : "missions overlapping your skill profile",
     },
     {
       label: "MISSIONS IN PROGRESS",
-      value: null,
+      value: teams.length,
       accent: "var(--signal)",
-      caption: "team formation not enabled yet",
+      caption: "missions with a solution team",
     },
   ];
 
