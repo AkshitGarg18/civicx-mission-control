@@ -90,7 +90,7 @@ export function Hero() {
               <span className="mono-label">Live Challenge Grid</span>
               <span className="flex items-center gap-1.5 font-mono text-[10px] tracking-[0.16em] text-cyan/80">
                 <span className="h-1.5 w-1.5 rounded-full bg-cyan shadow-[0_0_8px_var(--neon-cyan)]" />
-                SECTOR IN
+                REALTIME
               </span>
             </div>
 
