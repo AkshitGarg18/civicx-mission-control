@@ -12,6 +12,8 @@ function NavList({
   active: string;
   onNavigate: (id: string) => void;
 }) {
+  const reduced = useReducedMotion();
+
   return (
     <nav className="flex flex-col gap-1">
       {citizenNav.map((item, i) => {
@@ -22,7 +24,7 @@ function NavList({
             key={item.id}
             type="button"
             onClick={() => onNavigate(item.id)}
-            initial={{ opacity: 0, x: -12 }}
+            initial={reduced ? false : { opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.06 * i, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
@@ -139,7 +141,7 @@ export function CitizenSidebar({
     <>
       {/* desktop */}
       <motion.aside
-        initial={reduced ? { opacity: 0 } : { opacity: 0, x: -24 }}
+        initial={reduced ? false : { opacity: 0, x: -24 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="glass fixed inset-y-0 left-0 z-40 hidden w-64 flex-col justify-between rounded-none border-y-0 border-l-0 px-4 py-6 lg:flex"

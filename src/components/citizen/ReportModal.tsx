@@ -393,7 +393,7 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                                 return (
                                   <motion.div
                                     key={f.id}
-                                    initial={{ opacity: 0, y: 8 }}
+                                    initial={reduced ? false : { opacity: 0, y: 8 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     className="glass-soft flex items-center gap-3 rounded-xl px-3 py-2.5"
                                   >

@@ -62,7 +62,7 @@ export function AiAnalysis({
           return (
             <motion.li
               key={step}
-              initial={{ opacity: 0, x: -8 }}
+              initial={reduced ? false : { opacity: 0, x: -8 }}
               animate={{ opacity: state === "idle" ? 0.4 : 1, x: 0 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               className="flex items-center gap-3 font-mono text-[11px] tracking-[0.12em] sm:text-xs"

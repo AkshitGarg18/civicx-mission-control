@@ -57,6 +57,8 @@ function ImpactRing({ percent }: { percent: number }) {
 
 /** Community impact section with gauge and metric readouts. */
 export function CommunityImpact() {
+  const reduced = useReducedMotion();
+
   return (
     <section id="impact" className="scroll-mt-24">
       <Reveal>
@@ -80,8 +82,8 @@ export function CommunityImpact() {
                 {impactMetrics.map((m, i) => (
                   <motion.div
                     key={m.label}
-                    initial={{ opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={reduced ? false : { opacity: 0, y: 12 }}
+                    whileInView={reduced ? {} : { opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.5, delay: 0.08 * i, ease: [0.16, 1, 0.3, 1] }}
                     className="glass-soft rounded-xl p-4"
