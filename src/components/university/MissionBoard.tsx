@@ -81,7 +81,7 @@ export function MissionBoard({
         } else if (!raw.includes(category.toLowerCase())) return false;
       }
       if (statusEntry && statusEntry.match.length > 0) {
-        if (!statusEntry.match.includes(row.status)) return false;
+        if (!(statusEntry.match as readonly string[]).includes(row.status)) return false;
       }
       return true;
     });
