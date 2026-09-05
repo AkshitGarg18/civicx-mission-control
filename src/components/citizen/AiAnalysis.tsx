@@ -1,20 +1,25 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowRight, Check, Loader2, Sparkles } from "lucide-react";
-import { analysisSteps, demoAnalysis, type AiAnalysisResult } from "@/lib/citizen-data";
+import { ArrowRight, Check, Loader2, RotateCcw, Sparkles, TriangleAlert } from "lucide-react";
+import { analysisSteps, type AiAnalysisResult } from "@/lib/citizen-data";
 import { PriorityChip } from "@/components/civicx/StatusChip";
 
 /**
  * Cinematic AI analysis screen.
  *
- * `result` is injected so a real Gemini response can replace `demoAnalysis`
- * later without changing this component.
+ * `result` arrives from the server-side Gemini analysis. Until it does, the
+ * scanning sequence keeps running; the steps mirror what the model is asked to
+ * produce, so nothing is claimed that did not happen.
  */
 export function AiAnalysis({
-  result = demoAnalysis,
+  result,
+  error,
+  onRetry,
   onCreateMission,
 }: {
-  result?: AiAnalysisResult;
+  result?: AiAnalysisResult | null;
+  error?: string | null;
+  onRetry?: () => void;
   onCreateMission: () => void;
 }) {
   const reduced = useReducedMotion();
@@ -28,7 +33,41 @@ export function AiAnalysis({
     return () => timers.forEach(clearTimeout);
   }, [reduced]);
 
-  const complete = done >= analysisSteps.length;
+  // Never show every step finished before the real result is back.
+  const progress = result ? done : Math.min(done, analysisSteps.length - 1);
+  const complete = !!result && progress >= analysisSteps.length;
+
+  if (error) {
+    return (
+      <div className="grid place-items-center py-14 text-center">
+        <span className="grid h-14 w-14 place-items-center rounded-full border border-warn/40 bg-warn/10">
+          <TriangleAlert className="h-5 w-5 text-warn" />
+        </span>
+        <p className="mt-6 font-mono text-[11px] tracking-[0.28em] text-warn">
+          AI ANALYSIS INTERRUPTED
+        </p>
+        <p className="mt-3 max-w-sm text-sm text-muted-foreground">{error}</p>
+        {onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-mono text-[10px] font-semibold tracking-[0.16em] text-background"
+            style={{ backgroundImage: "var(--gradient-accent)" }}
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            RETRY ANALYSIS
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={onCreateMission}
+          className="mt-3 font-mono text-[10px] tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          CLOSE
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
@@ -58,7 +97,7 @@ export function AiAnalysis({
 
       <ul className="mt-6 space-y-2.5">
         {analysisSteps.map((step, i) => {
-          const state = i < done ? "done" : i === done ? "active" : "idle";
+          const state = i < progress ? "done" : i === progress ? "active" : "idle";
           return (
             <motion.li
               key={step}
@@ -83,7 +122,7 @@ export function AiAnalysis({
       </ul>
 
       <AnimatePresence>
-        {complete && (
+        {complete && result && (
           <motion.div
             initial={reduced ? { opacity: 0 } : { opacity: 0, y: 18, filter: "blur(6px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -115,6 +154,36 @@ export function AiAnalysis({
                 ))}
               </div>
             </div>
+
+            {result.stakeholders && result.stakeholders.length > 0 && (
+              <div className="glass-soft mt-3 rounded-xl p-4">
+                <p className="mono-label text-muted-foreground">AFFECTED STAKEHOLDERS</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {result.stakeholders.map((s) => (
+                    <span
+                      key={s}
+                      className="rounded-lg border border-violet/30 bg-violet/5 px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-violet"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {result.directions && result.directions.length > 0 && (
+              <div className="glass-soft mt-3 rounded-xl p-4">
+                <p className="mono-label text-muted-foreground">SOLUTION DIRECTIONS</p>
+                <ul className="mt-3 space-y-2">
+                  {result.directions.map((d) => (
+                    <li key={d} className="flex items-start gap-2.5 text-sm text-foreground/85">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-signal" />
+                      {d}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="glass-soft mt-3 rounded-xl p-4">
               <p className="mono-label text-muted-foreground">AI SUMMARY</p>
