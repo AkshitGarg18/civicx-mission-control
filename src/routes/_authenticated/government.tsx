@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { RoleGate } from "@/components/auth/RoleGate";
 import { AmbientBackground } from "@/components/civicx/AmbientBackground";
-import { CitizenDashboard } from "@/components/citizen/CitizenDashboard";
+import { DashboardShell } from "@/components/civicx/DashboardShell";
 
-const title = "Citizen Mission Control | CivicX";
+const title = "Government Console — Monitor & Measure Impact | CivicX";
 const description =
-  "Report civic challenges, track how your reports progress through AI analysis and university matching, and see the impact you create in your community.";
+  "The CivicX government console: monitor societal challenges, coordinate stakeholders and measure verified real-world impact.";
 
-export const Route = createFileRoute("/citizen")({
+export const Route = createFileRoute("/_authenticated/government")({
   head: () => ({
     meta: [
       { title },
@@ -18,9 +19,11 @@ export const Route = createFileRoute("/citizen")({
     ],
   }),
   component: () => (
+    <RoleGate role="government">
     <div className="relative min-h-screen overflow-x-hidden">
       <AmbientBackground />
-      <CitizenDashboard />
+      <DashboardShell roleId="government" />
     </div>
+    </RoleGate>
   ),
 });

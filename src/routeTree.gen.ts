@@ -10,15 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AccessRouteImport } from './routes/access'
-import { Route as CitizenRouteImport } from './routes/citizen'
-import { Route as GovernmentRouteImport } from './routes/government'
-import { Route as IndustryRouteImport } from './routes/industry'
-import { Route as UniversityRouteImport } from './routes/university'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as AuthenticatedCitizenRouteImport } from './routes/_authenticated/citizen'
+import { Route as AuthenticatedGovernmentRouteImport } from './routes/_authenticated/government'
+import { Route as AuthenticatedIndustryRouteImport } from './routes/_authenticated/industry'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedUniversityRouteImport } from './routes/_authenticated/university'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccessRoute = AccessRouteImport.update({
@@ -26,75 +35,131 @@ const AccessRoute = AccessRouteImport.update({
   path: '/access',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CitizenRoute = CitizenRouteImport.update({
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedCitizenRoute = AuthenticatedCitizenRouteImport.update({
   id: '/citizen',
   path: '/citizen',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const GovernmentRoute = GovernmentRouteImport.update({
+const AuthenticatedGovernmentRoute = AuthenticatedGovernmentRouteImport.update({
   id: '/government',
   path: '/government',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const IndustryRoute = IndustryRouteImport.update({
+const AuthenticatedIndustryRoute = AuthenticatedIndustryRouteImport.update({
   id: '/industry',
   path: '/industry',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const UniversityRoute = UniversityRouteImport.update({
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedUniversityRoute = AuthenticatedUniversityRouteImport.update({
   id: '/university',
   path: '/university',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/access': typeof AccessRoute
-  '/citizen': typeof CitizenRoute
-  '/government': typeof GovernmentRoute
-  '/industry': typeof IndustryRoute
-  '/university': typeof UniversityRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/citizen': typeof AuthenticatedCitizenRoute
+  '/government': typeof AuthenticatedGovernmentRoute
+  '/industry': typeof AuthenticatedIndustryRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/university': typeof AuthenticatedUniversityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/access': typeof AccessRoute
-  '/citizen': typeof CitizenRoute
-  '/government': typeof GovernmentRoute
-  '/industry': typeof IndustryRoute
-  '/university': typeof UniversityRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/citizen': typeof AuthenticatedCitizenRoute
+  '/government': typeof AuthenticatedGovernmentRoute
+  '/industry': typeof AuthenticatedIndustryRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/university': typeof AuthenticatedUniversityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/access': typeof AccessRoute
-  '/citizen': typeof CitizenRoute
-  '/government': typeof GovernmentRoute
-  '/industry': typeof IndustryRoute
-  '/university': typeof UniversityRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/_authenticated/citizen': typeof AuthenticatedCitizenRoute
+  '/_authenticated/government': typeof AuthenticatedGovernmentRoute
+  '/_authenticated/industry': typeof AuthenticatedIndustryRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/university': typeof AuthenticatedUniversityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/access' | '/citizen' | '/government' | '/industry' | '/university'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/access' | '/citizen' | '/government' | '/industry' | '/university'
-  id:
-    | '__root__'
     | '/'
     | '/access'
+    | '/login'
+    | '/signup'
     | '/citizen'
     | '/government'
     | '/industry'
+    | '/profile'
+    | '/settings'
     | '/university'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/access'
+    | '/login'
+    | '/signup'
+    | '/citizen'
+    | '/government'
+    | '/industry'
+    | '/profile'
+    | '/settings'
+    | '/university'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/access'
+    | '/login'
+    | '/signup'
+    | '/_authenticated/citizen'
+    | '/_authenticated/government'
+    | '/_authenticated/industry'
+    | '/_authenticated/profile'
+    | '/_authenticated/settings'
+    | '/_authenticated/university'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AccessRoute: typeof AccessRoute
-  CitizenRoute: typeof CitizenRoute
-  GovernmentRoute: typeof GovernmentRoute
-  IndustryRoute: typeof IndustryRoute
-  UniversityRoute: typeof UniversityRoute
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -106,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/access': {
       id: '/access'
       path: '/access'
@@ -113,44 +185,92 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccessRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/citizen': {
-      id: '/citizen'
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/citizen': {
+      id: '/_authenticated/citizen'
       path: '/citizen'
       fullPath: '/citizen'
-      preLoaderRoute: typeof CitizenRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedCitizenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/government': {
-      id: '/government'
+    '/_authenticated/government': {
+      id: '/_authenticated/government'
       path: '/government'
       fullPath: '/government'
-      preLoaderRoute: typeof GovernmentRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedGovernmentRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/industry': {
-      id: '/industry'
+    '/_authenticated/industry': {
+      id: '/_authenticated/industry'
       path: '/industry'
       fullPath: '/industry'
-      preLoaderRoute: typeof IndustryRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndustryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/university': {
-      id: '/university'
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/university': {
+      id: '/_authenticated/university'
       path: '/university'
       fullPath: '/university'
-      preLoaderRoute: typeof UniversityRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedUniversityRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCitizenRoute: typeof AuthenticatedCitizenRoute
+  AuthenticatedGovernmentRoute: typeof AuthenticatedGovernmentRoute
+  AuthenticatedIndustryRoute: typeof AuthenticatedIndustryRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedUniversityRoute: typeof AuthenticatedUniversityRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCitizenRoute: AuthenticatedCitizenRoute,
+  AuthenticatedGovernmentRoute: AuthenticatedGovernmentRoute,
+  AuthenticatedIndustryRoute: AuthenticatedIndustryRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedUniversityRoute: AuthenticatedUniversityRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AccessRoute: AccessRoute,
-  CitizenRoute: CitizenRoute,
-  GovernmentRoute: GovernmentRoute,
-  IndustryRoute: IndustryRoute,
-  UniversityRoute: UniversityRoute,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

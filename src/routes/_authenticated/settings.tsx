@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AmbientBackground } from "@/components/civicx/AmbientBackground";
-import { DashboardShell } from "@/components/civicx/DashboardShell";
+import { OperatorPanel } from "@/components/auth/OperatorPanel";
 
-const title = "Government Console — Monitor & Measure Impact | CivicX";
+const title = "Console Settings | CivicX";
 const description =
-  "The CivicX government console: monitor societal challenges, coordinate stakeholders and measure verified real-world impact.";
+  "Console preferences for your CivicX operator account — notification, privacy and network options.";
 
-export const Route = createFileRoute("/government")({
+export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
       { title },
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/government")({
   component: () => (
     <div className="relative min-h-screen overflow-x-hidden">
       <AmbientBackground />
-      <DashboardShell roleId="government" />
+      <OperatorPanel view="settings" />
     </div>
   ),
 });

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { RoleGate } from "@/components/auth/RoleGate";
 import { AmbientBackground } from "@/components/civicx/AmbientBackground";
 import { DashboardShell } from "@/components/civicx/DashboardShell";
 
@@ -6,7 +7,7 @@ const title = "University Console — Build Solution Teams | CivicX";
 const description =
   "The CivicX university console: discover challenges matched to your students' expertise and build teams that ship real solutions.";
 
-export const Route = createFileRoute("/university")({
+export const Route = createFileRoute("/_authenticated/university")({
   head: () => ({
     meta: [
       { title },
@@ -18,9 +19,11 @@ export const Route = createFileRoute("/university")({
     ],
   }),
   component: () => (
+    <RoleGate role="university">
     <div className="relative min-h-screen overflow-x-hidden">
       <AmbientBackground />
       <DashboardShell roleId="university" />
     </div>
+    </RoleGate>
   ),
 });

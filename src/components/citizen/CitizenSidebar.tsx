@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Menu, X } from "lucide-react";
-import { citizenNav, citizenProfile } from "@/lib/citizen-data";
+import { citizenNav } from "@/lib/citizen-data";
+import { UserMenu } from "@/components/auth/UserMenu";
 import { cn } from "@/lib/utils";
 
 function NavList({
@@ -55,7 +56,7 @@ function NavList({
   );
 }
 
-function SidebarFooter() {
+function SidebarFooter({ onNavigate }: { onNavigate?: ((id: string) => void) | undefined }) {
   return (
     <div className="space-y-4">
       <div className="glass-soft rounded-xl px-3 py-3">
@@ -69,23 +70,7 @@ function SidebarFooter() {
         </p>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl border border-border px-3 py-3">
-        <span
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg font-mono text-[11px] tracking-widest text-cyan"
-          style={{
-            backgroundColor: "color-mix(in oklab, var(--neon-cyan) 12%, transparent)",
-            boxShadow: "inset 0 0 0 1px color-mix(in oklab, var(--neon-cyan) 30%, transparent)",
-          }}
-        >
-          {citizenProfile.initials}
-        </span>
-        <span className="min-w-0">
-          <span className="block truncate text-sm font-medium">{citizenProfile.name}</span>
-          <span className="block truncate text-xs text-muted-foreground">
-            {citizenProfile.role}
-          </span>
-        </span>
-      </div>
+      <UserMenu onNavigateSection={onNavigate} />
 
       <Link
         to="/access"
@@ -150,7 +135,7 @@ export function CitizenSidebar({
           <Logo />
           <NavList active={active} onNavigate={onNavigate} />
         </div>
-        <SidebarFooter />
+        <SidebarFooter onNavigate={onNavigate} />
       </motion.aside>
 
       {/* mobile bar */}
@@ -199,7 +184,7 @@ export function CitizenSidebar({
                 </div>
                 <NavList active={active} onNavigate={go} />
               </div>
-              <SidebarFooter />
+              <SidebarFooter onNavigate={go} />
             </motion.div>
           </div>
         )}
