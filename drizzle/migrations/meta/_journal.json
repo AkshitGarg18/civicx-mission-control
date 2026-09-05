@@ -36,6 +36,13 @@
       "when": 1788620884172,
       "tag": "0004_university_challenge_discovery",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788622053759,
+      "tag": "0005_create_team_formation",
+      "breakpoints": true
     }
   ]
 }

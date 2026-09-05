@@ -22,9 +22,13 @@ const formatDate = (iso: string) =>
 export function UniversityMissionDetail({
   challengeId,
   onClose,
+  onTeamCreated,
+  onViewTeam,
 }: {
   challengeId: string | null;
   onClose: () => void;
+  onTeamCreated?: () => void;
+  onViewTeam?: (teamId: string) => void;
 }) {
   const reduced = useReducedMotion() ?? false;
   const [row, setRow] = useState<ChallengeRow | null>(null);
@@ -264,8 +268,10 @@ export function UniversityMissionDetail({
 
       <TeamFormationModal
         open={teamOpen}
-        skills={row?.recommended_skills ?? null}
+        challenge={row}
         onClose={() => setTeamOpen(false)}
+        onCreated={onTeamCreated}
+        onViewTeam={onViewTeam}
       />
     </>
   );

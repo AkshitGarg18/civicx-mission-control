@@ -23,8 +23,8 @@ export interface UniversityNavItem {
 export const universityNav: UniversityNavItem[] = [
   { id: "mission-board", label: "Mission Board", icon: LayoutGrid, ready: true },
   { id: "recommended", label: "Recommended", icon: Sparkles, ready: false },
-  { id: "my-missions", label: "My Missions", icon: Radar, ready: false },
-  { id: "teams", label: "Teams", icon: Users, ready: false },
+  { id: "my-missions", label: "My Missions", icon: Radar, ready: true },
+  { id: "teams", label: "Teams", icon: Users, ready: true },
   { id: "proposals", label: "Proposals", icon: FileStack, ready: false },
   { id: "impact", label: "Impact", icon: BarChart3, ready: false },
 ];
