@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { roleById } from "@/lib/civicx-roles";
+import { parseSkills, updateMyProfile } from "@/lib/profile-service";
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -13,12 +15,100 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** Placeholder profile / settings console for the signed-in operator. */
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  multiline,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  multiline?: boolean;
+}) {
+  const id = `field-${label.toLowerCase().replace(/\W+/g, "-")}`;
+  const shared =
+    "mt-2 w-full rounded-xl border border-border bg-background/60 px-4 py-3 text-sm outline-none transition-colors focus:border-cyan/60";
+  return (
+    <div className="border-t border-border py-4">
+      <label htmlFor={id} className="mono-label text-muted-foreground">
+        {label}
+      </label>
+      {multiline ? (
+        <textarea
+          id={id}
+          rows={3}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          className={shared}
+        />
+      ) : (
+        <input
+          id={id}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          className={shared}
+        />
+      )}
+    </div>
+  );
+}
+
+/** Profile / settings console for the signed-in operator. */
 export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
   const reduced = useReducedMotion();
-  const { currentProfile, currentUser } = useAuth();
+  const { currentProfile, currentUser, refreshProfile } = useAuth();
   const role = currentProfile?.role ?? "citizen";
   const home = roleById[role].to;
+
+  const [name, setName] = useState("");
+  const [institution, setInstitution] = useState("");
+  const [course, setCourse] = useState("");
+  const [year, setYear] = useState("");
+  const [bio, setBio] = useState("");
+  const [skills, setSkills] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!currentProfile) return;
+    setName(currentProfile.name ?? "");
+    setInstitution(currentProfile.institution ?? "");
+    setCourse(currentProfile.course ?? "");
+    setYear(currentProfile.year ?? "");
+    setBio(currentProfile.bio ?? "");
+    setSkills((currentProfile.skills ?? []).join(", "));
+  }, [currentProfile]);
+
+  const save = async () => {
+    if (!currentUser) return;
+    setSaving(true);
+    setMessage(null);
+    setError(null);
+    try {
+      await updateMyProfile(currentUser.id, {
+        name: name.trim() || null,
+        institution: institution.trim() || null,
+        course: course.trim() || null,
+        year: year.trim() || null,
+        bio: bio.trim() || null,
+        skills: parseSkills(skills),
+      });
+      await refreshProfile();
+      setMessage("PROFILE SYNCHRONISED");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save your profile.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const skillsMissing = (currentProfile?.skills ?? []).length === 0;
 
   return (
     <div className="relative min-h-screen px-4 py-8 sm:px-6 lg:py-12">
@@ -48,26 +138,70 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
 
         {view === "profile" ? (
           <div className="mt-6">
-            <Row label="NAME" value={currentProfile?.name ?? "Not set"} />
-            <Row label="EMAIL" value={currentProfile?.email ?? currentUser?.email ?? "—"} />
-            <Row label="ROLE" value={roleById[role].title} />
-            <Row label="ORGANISATION" value={currentProfile?.institution ?? "—"} />
-            <Row
-              label="SKILLS"
-              value={currentProfile?.skills?.join(", ") || "None recorded yet"}
-            />
+            {skillsMissing && (
+              <div className="rounded-xl border border-violet/30 bg-violet/5 p-4">
+                <p className="mono-label text-violet">SKILL PROFILE INCOMPLETE</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Add your skills below so CivicX can match you to civic missions.
+                </p>
+              </div>
+            )}
+
+            <div className="mt-4">
+              <Field label="NAME" value={name} onChange={setName} />
+              <Row
+                label="EMAIL"
+                value={currentProfile?.email ?? currentUser?.email ?? "—"}
+              />
+              <Row label="ROLE" value={roleById[role].title} />
+              <Field
+                label="ORGANISATION / UNIVERSITY"
+                value={institution}
+                onChange={setInstitution}
+                placeholder="e.g. Bhagwan Parshuram Institute of Technology"
+              />
+              <Field
+                label="COURSE / BRANCH"
+                value={course}
+                onChange={setCourse}
+                placeholder="e.g. B.Tech CSE"
+              />
+              <Field label="YEAR" value={year} onChange={setYear} placeholder="e.g. 2nd Year" />
+              <Field
+                label="SKILLS (COMMA SEPARATED)"
+                value={skills}
+                onChange={setSkills}
+                placeholder="Python, Machine Learning, IoT, GIS"
+              />
+              <Field label="BIO" value={bio} onChange={setBio} multiline />
+            </div>
+
+            {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
+            {message && <p className="mono-label mt-4 text-signal">{message}</p>}
+
+            <motion.button
+              type="button"
+              onClick={save}
+              disabled={saving}
+              whileTap={{ scale: 0.97 }}
+              className="mt-6 inline-flex items-center justify-center rounded-xl px-6 py-3 font-mono text-[11px] font-semibold tracking-[0.18em] text-background disabled:opacity-50"
+              style={{ backgroundImage: "var(--gradient-accent)" }}
+            >
+              {saving ? "SAVING…" : "SAVE PROFILE"}
+            </motion.button>
           </div>
         ) : (
-          <div className="mt-6">
-            <Row label="NOTIFICATIONS" value="Mission updates — coming soon" />
-            <Row label="VISIBILITY" value="Public reporting profile — coming soon" />
-            <Row label="LANGUAGE" value="English (default)" />
-          </div>
+          <>
+            <div className="mt-6">
+              <Row label="NOTIFICATIONS" value="Mission updates — coming soon" />
+              <Row label="VISIBILITY" value="Public reporting profile — coming soon" />
+              <Row label="LANGUAGE" value="English (default)" />
+            </div>
+            <p className="mono-label mt-8 text-muted-foreground">
+              THIS CONSOLE IS INITIALISING — EDITING ARRIVES IN A LATER MISSION UPDATE
+            </p>
+          </>
         )}
-
-        <p className="mono-label mt-8 text-muted-foreground">
-          THIS CONSOLE IS INITIALISING — EDITING ARRIVES IN A LATER MISSION UPDATE
-        </p>
       </motion.div>
     </div>
   );
