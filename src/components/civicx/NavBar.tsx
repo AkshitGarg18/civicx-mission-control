@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, Hexagon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -99,12 +100,12 @@ export function NavBar() {
               </a>
             );
           })}
-          <a
-            href="#launch"
+          <Link
+            to="/access"
             className="ml-2 rounded-xl border border-cyan/35 bg-cyan/10 px-4 py-2 text-sm font-medium text-cyan transition-all duration-300 hover:bg-cyan/20 hover:shadow-[var(--shadow-glow-cyan)] active:scale-[0.97]"
           >
             Enter Platform
-          </a>
+          </Link>
         </div>
 
         <button
@@ -136,13 +137,13 @@ export function NavBar() {
                     {l.label}
                   </a>
                 ))}
-                <a
-                  href="#launch"
+                <Link
+                  to="/access"
                   onClick={() => setOpen(false)}
                   className="mt-1 rounded-xl border border-cyan/35 bg-cyan/10 px-3 py-2.5 text-center text-sm font-medium text-cyan"
                 >
                   Enter Platform
-                </a>
+                </Link>
               </div>
             </motion.div>
           )}

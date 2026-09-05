@@ -1,6 +1,9 @@
 import { motion, useReducedMotion } from "motion/react";
 import { Rocket } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Reveal } from "./Reveal";
+
+const MotionLink = motion.create(Link);
 
 export function FinalCTA() {
   const reduced = useReducedMotion();
@@ -33,8 +36,8 @@ export function FinalCTA() {
               <p className="mx-auto mt-5 max-w-xl text-muted-foreground">
                 Join the network turning local challenges into measurable, verified outcomes.
               </p>
-              <motion.a
-                href="#top"
+              <MotionLink
+                to="/access"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 className="mt-10 inline-flex items-center gap-2 rounded-xl px-8 py-4 font-medium text-primary-foreground"
@@ -45,7 +48,7 @@ export function FinalCTA() {
               >
                 <Rocket className="h-4 w-4" />
                 Launch CivicX
-              </motion.a>
+              </MotionLink>
             </div>
           </div>
         </Reveal>
