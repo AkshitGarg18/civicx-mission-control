@@ -61,8 +61,8 @@ export function TeamFormationModal({
   open: boolean;
   challenge: ChallengeRow | null;
   onClose: () => void;
-  onCreated?: () => void;
-  onViewTeam?: (teamId: string) => void;
+  onCreated?: (() => void) | undefined;
+  onViewTeam?: ((teamId: string) => void) | undefined;
 }) {
   const reduced = useReducedMotion() ?? false;
   const { currentProfile } = useAuth();
