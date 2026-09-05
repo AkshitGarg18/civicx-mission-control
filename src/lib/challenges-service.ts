@@ -8,7 +8,12 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import type { MissionStatus, Priority } from "@/lib/civicx-data";
+import type {
+  ChallengeCategory,
+  ChallengeNode,
+  MissionStatus,
+  Priority,
+} from "@/lib/civicx-data";
 import type { CitizenMission } from "@/lib/citizen-data";
 
 export type ChallengeRow = Database["public"]["Tables"]["challenges"]["Row"];
@@ -250,5 +255,104 @@ export function toCitizenMission(row: ChallengeRow): CitizenMission {
     status,
     progress: progressMap[status],
     reported: relativeTime(row.created_at),
+  };
+}
+
+/* ---------- map projection (live challenge nodes) ---------- */
+
+/** Rough India bounding box used to project coordinates onto the canvas. */
+const BOUNDS = { minLat: 6, maxLat: 37, minLng: 68, maxLng: 98 };
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+const categoryLookup: Record<string, ChallengeCategory> = {
+  WATER: "Water",
+  WASTE: "Waste",
+  "WASTE MANAGEMENT": "Waste",
+  EDUCATION: "Education",
+  HEALTHCARE: "Healthcare",
+  HEALTH: "Healthcare",
+  INFRASTRUCTURE: "Infrastructure",
+  "PUBLIC SAFETY": "Safety",
+  SAFETY: "Safety",
+  ENVIRONMENT: "Waste",
+};
+
+/** Best-effort mapping of a free-text category onto the visual category set. */
+export function toChallengeCategory(raw: string | null): ChallengeCategory {
+  if (!raw) return "Infrastructure";
+  const key = raw.trim().toUpperCase();
+  if (categoryLookup[key]) return categoryLookup[key];
+  const hit = Object.keys(categoryLookup).find((k) => key.includes(k));
+  return hit ? categoryLookup[hit]! : "Infrastructure";
+}
+
+/** True when a row can be placed on the map. */
+export function hasCoordinates(row: ChallengeRow): boolean {
+  return (
+    typeof row.latitude === "number" &&
+    typeof row.longitude === "number" &&
+    Number.isFinite(row.latitude) &&
+    Number.isFinite(row.longitude) &&
+    Math.abs(row.latitude) <= 90 &&
+    Math.abs(row.longitude) <= 180
+  );
+}
+
+/** Map a stored challenge onto the existing visual node shape. */
+export function toChallengeNode(row: ChallengeRow, index = 0): ChallengeNode {
+  const lat = row.latitude ?? 0;
+  const lng = row.longitude ?? 0;
+  const rawX = ((lng - BOUNDS.minLng) / (BOUNDS.maxLng - BOUNDS.minLng)) * 100;
+  const rawY = ((BOUNDS.maxLat - lat) / (BOUNDS.maxLat - BOUNDS.minLat)) * 100;
+  // nudge overlapping reports apart so nearby nodes stay clickable
+  const jitter = ((index % 5) - 2) * 1.6;
+
+  return {
+    id: row.id,
+    code: `MISSION #${row.id.slice(0, 4).toUpperCase()}`,
+    name: row.title,
+    location: row.location_name ?? "Location pending",
+    category: toChallengeCategory(row.category),
+    priority: (row.priority as Priority) ?? "MEDIUM",
+    affected:
+      row.estimated_impact !== null && row.estimated_impact !== undefined
+        ? row.estimated_impact.toLocaleString()
+        : "",
+    status: statusMap[row.status] ?? "SIGNAL DETECTED",
+    confidence: row.ai_confidence !== null ? Math.round(Number(row.ai_confidence)) : 0,
+    description: row.description,
+    aiAnalysis: row.ai_summary ?? "AI analysis pending for this signal.",
+    skills: row.recommended_skills ?? [],
+    stakeholders: row.affected_stakeholders ?? [],
+    directions: row.solution_directions ?? [],
+    live: true,
+    x: clamp(rawX + jitter, 6, 94),
+    y: clamp(rawY + jitter, 8, 92),
+  };
+}
+
+/** Challenges with usable coordinates, ready for the map. */
+export async function getMapChallenges(): Promise<ChallengeRow[]> {
+  const rows = await getChallenges();
+  return rows.filter(hasCoordinates);
+}
+
+/**
+ * Realtime INSERT subscription on `challenges`.
+ * Rows still pass through RLS, so a citizen only receives their own signals.
+ */
+export function subscribeToNewChallenges(onInsert: (row: ChallengeRow) => void) {
+  const channel = supabase
+    .channel("civicx-challenges")
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "challenges" },
+      (payload) => onInsert(payload.new as ChallengeRow),
+    )
+    .subscribe();
+
+  return () => {
+    void supabase.removeChannel(channel);
   };
 }
