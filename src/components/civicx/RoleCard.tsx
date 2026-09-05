@@ -42,7 +42,7 @@ export function RoleCard({ role, selected, onSelect, index }: RoleCardProps) {
         setHover(false);
         setTilt({ rx: 0, ry: 0 });
       }}
-      initial={reduced ? false : { opacity: 0, y: 28, filter: "blur(8px)" }}
+      initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
       animate={
         reduced
           ? { opacity: dimmed ? 0.35 : 1 }

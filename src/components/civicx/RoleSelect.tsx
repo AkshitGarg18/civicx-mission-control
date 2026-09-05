@@ -26,14 +26,14 @@ export function RoleSelect() {
       <motion.div
         aria-hidden
         className="pointer-events-none fixed inset-0 -z-10 bg-background"
-        initial={reduced ? false : { opacity: 0 }}
+        initial={{ opacity: 0 }}
         animate={{ opacity: 0.65 }}
         transition={{ duration: 0.9, ease: "easeOut" }}
       />
 
       <motion.div
         className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4"
-        initial={reduced ? false : { opacity: 0, y: -14 }}
+        initial={{ opacity: 0, y: -14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
@@ -58,7 +58,7 @@ export function RoleSelect() {
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center py-12">
         <motion.div
           className="max-w-2xl"
-          initial={reduced ? false : { opacity: 0, y: 24, filter: "blur(8px)" }}
+          initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         >
@@ -85,7 +85,7 @@ export function RoleSelect() {
 
         <motion.p
           className="mt-8 text-center text-sm text-muted-foreground"
-          initial={reduced ? false : { opacity: 0 }}
+          initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.7 }}
         >
@@ -103,7 +103,7 @@ export function RoleSelect() {
       {/* live system status */}
       <motion.div
         className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 border-t border-border pt-6 sm:flex-row sm:justify-between"
-        initial={reduced ? false : { opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6 }}
       >

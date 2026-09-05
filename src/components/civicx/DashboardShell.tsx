@@ -35,7 +35,7 @@ export function DashboardShell({
 
       <motion.div
         className="glass relative mx-auto mt-10 max-w-4xl overflow-hidden rounded-[2rem] px-6 py-16 text-center sm:px-12"
-        initial={reduced ? false : { opacity: 0, y: 24, filter: "blur(8px)" }}
+        initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       >
