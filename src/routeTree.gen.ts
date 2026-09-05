@@ -15,6 +15,7 @@ import { Route as CitizenRouteImport } from './routes/citizen'
 import { Route as GovernmentRouteImport } from './routes/government'
 import { Route as IndustryRouteImport } from './routes/industry'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as UniversityRouteImport } from './routes/university'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UniversityRoute = UniversityRouteImport.update({
   id: '/university',
   path: '/university',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/government': typeof GovernmentRoute
   '/industry': typeof IndustryRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/university': typeof UniversityRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/government': typeof GovernmentRoute
   '/industry': typeof IndustryRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/university': typeof UniversityRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/government': typeof GovernmentRoute
   '/industry': typeof IndustryRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/university': typeof UniversityRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/government'
     | '/industry'
     | '/login'
+    | '/signup'
     | '/university'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/government'
     | '/industry'
     | '/login'
+    | '/signup'
     | '/university'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/government'
     | '/industry'
     | '/login'
+    | '/signup'
     | '/university'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   GovernmentRoute: typeof GovernmentRoute
   IndustryRoute: typeof IndustryRoute
   LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
   UniversityRoute: typeof UniversityRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/university': {
       id: '/university'
       path: '/university'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   GovernmentRoute: GovernmentRoute,
   IndustryRoute: IndustryRoute,
   LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
   UniversityRoute: UniversityRoute,
 }
 export const routeTree = rootRouteImport
