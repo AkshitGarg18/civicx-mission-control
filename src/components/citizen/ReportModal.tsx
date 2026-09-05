@@ -130,8 +130,19 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
 
   const transmit = () => {
     setPhase("transmit");
+    // Persists to the backend when a session exists; in demo mode this resolves
+    // to null and the flow continues exactly as before.
+    void createChallenge({
+      title: draft.title.trim(),
+      description: draft.description.trim(),
+      category: draft.category,
+      locationName: draft.location?.label ?? null,
+      latitude: parseCoord(draft.location?.lat),
+      longitude: parseCoord(draft.location?.lng),
+    }).catch((err) => console.error("createChallenge failed", err));
     setTimeout(() => setPhase("analysis"), reduced ? 200 : 1800);
   };
+
 
   return (
     <AnimatePresence>
