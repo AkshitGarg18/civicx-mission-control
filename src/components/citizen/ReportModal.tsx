@@ -25,13 +25,15 @@ import {
 } from "@/lib/citizen-data";
 import { AiAnalysis } from "./AiAnalysis";
 import {
-  applyChallengeAnalysis,
   createChallenge,
   uploadChallengeEvidence,
   CHALLENGE_CREATED_EVENT,
   NotAuthenticatedError,
 } from "@/lib/challenges-service";
-import { analyseChallenge, toAnalysisResult } from "@/lib/mock-analysis";
+import { useServerFn } from "@tanstack/react-start";
+import { analyzeChallenge } from "@/lib/analysis.functions";
+import { toAnalysisResult } from "@/lib/analysis-result";
+
 import { cn } from "@/lib/utils";
 
 
