@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { RoleGate } from "@/components/auth/RoleGate";
 import { AmbientBackground } from "@/components/civicx/AmbientBackground";
 import { DashboardShell } from "@/components/civicx/DashboardShell";
 
@@ -18,9 +19,11 @@ export const Route = createFileRoute("/_authenticated/industry")({
     ],
   }),
   component: () => (
+    <RoleGate role="industry">
     <div className="relative min-h-screen overflow-x-hidden">
       <AmbientBackground />
       <DashboardShell roleId="industry" />
     </div>
+    </RoleGate>
   ),
 });
