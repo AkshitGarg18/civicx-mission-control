@@ -25,7 +25,7 @@ export function RoleSelect() {
       {/* deeper dark wash over the ambient background */}
       <motion.div
         aria-hidden
-        className="pointer-events-none fixed inset-0 -z-[5] bg-background"
+        className="pointer-events-none fixed inset-0 -z-10 bg-background"
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.65 }}
         transition={{ duration: 0.9, ease: "easeOut" }}
