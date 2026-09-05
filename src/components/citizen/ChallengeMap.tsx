@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import maplibregl, { type LngLatBoundsLike, type Map as MapLibreMap } from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import type { LngLatBoundsLike, Map as MapLibreMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Crosshair, LocateFixed, Minus, Plus } from "lucide-react";
 import type { ChallengeRow } from "@/lib/challenges-service";

@@ -214,7 +214,7 @@ export async function getChallengeEvidence(challengeId: string): Promise<Evidenc
 
 /* ---------- presentation mapping (keeps the existing UI contract) ---------- */
 
-const statusMap: Record<string, MissionStatus> = {
+export const statusMap: Record<string, MissionStatus> = {
   REPORTED: "SIGNAL DETECTED",
   AI_ANALYSIS: "SIGNAL DETECTED",
   AI_ANALYSIS_FAILED: "SIGNAL DETECTED",
