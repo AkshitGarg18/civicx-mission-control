@@ -14,7 +14,168 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      challenge_evidence: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          file_name: string | null
+          file_type: string | null
+          file_url: string
+          id: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          file_name?: string | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          file_name?: string | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_evidence_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_status_history: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          id: string
+          message: string | null
+          status: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          status: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_status_history_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          ai_confidence: number | null
+          ai_summary: string | null
+          category: string | null
+          created_at: string
+          created_by: string
+          description: string
+          estimated_impact: number | null
+          id: string
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          priority: string
+          recommended_skills: string[] | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_confidence?: number | null
+          ai_summary?: string | null
+          category?: string | null
+          created_at?: string
+          created_by: string
+          description: string
+          estimated_impact?: number | null
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          priority?: string
+          recommended_skills?: string[] | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_confidence?: number | null
+          ai_summary?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          estimated_impact?: number | null
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          priority?: string
+          recommended_skills?: string[] | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenges_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          institution: string | null
+          name: string | null
+          role: string
+          skills: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          institution?: string | null
+          name?: string | null
+          role?: string
+          skills?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          institution?: string | null
+          name?: string | null
+          role?: string
+          skills?: string[] | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
