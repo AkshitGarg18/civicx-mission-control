@@ -10,8 +10,35 @@ import { statusMap } from "@/lib/challenges-service";
 const DEFAULT_CENTER: [number, number] = [77.1025, 28.7041];
 const DEFAULT_ZOOM = 10.5;
 
-/** Free, keyless dark vector basemap (OpenFreeMap / OpenStreetMap data). */
-const DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
+/**
+ * Keyless dark raster basemap (Esri Dark Gray Canvas): real roads, streets,
+ * neighbourhoods and place labels, with no API token to configure.
+ */
+const ESRI = "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas";
+const DARK_STYLE: maplibregl.StyleSpecification = {
+  version: 8,
+  sources: {
+    base: {
+      type: "raster",
+      tiles: [`${ESRI}/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`],
+      tileSize: 256,
+      maxzoom: 16,
+      attribution:
+        'Tiles © <a href="https://www.esri.com/">Esri</a> — Esri, HERE, Garmin, © OpenStreetMap contributors',
+    },
+    labels: {
+      type: "raster",
+      tiles: [`${ESRI}/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`],
+      tileSize: 256,
+      maxzoom: 16,
+    },
+  },
+  layers: [
+    { id: "background", type: "background", paint: { "background-color": "#05070d" } },
+    { id: "base", type: "raster", source: "base", paint: { "raster-opacity": 0.95 } },
+    { id: "labels", type: "raster", source: "labels", paint: { "raster-opacity": 0.9 } },
+  ],
+};
 
 const priorityStyle: Record<string, { color: string; ring: number; pulse: string }> = {
   CRITICAL: { color: "var(--destructive)", ring: 20, pulse: "civicx-pulse-strong" },
