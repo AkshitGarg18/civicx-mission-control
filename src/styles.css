@@ -374,3 +374,178 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ============ geographic challenge map (MapLibre + CivicX chrome) ============ */
+
+.civicx-map .maplibregl-ctrl-attrib {
+  background: color-mix(in oklab, var(--background) 78%, transparent);
+  color: var(--muted-foreground);
+  font-size: 10px;
+  border-radius: 0.6rem;
+}
+.civicx-map .maplibregl-ctrl-attrib a { color: var(--muted-foreground); }
+.civicx-map .maplibregl-canvas { outline: none; }
+
+.civicx-marker {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 1.5rem;
+  width: 1.5rem;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.civicx-marker-core {
+  height: 0.6rem;
+  width: 0.6rem;
+  border-radius: 999px;
+  background: var(--marker-color);
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, var(--marker-color) 22%, transparent),
+    0 0 14px color-mix(in oklab, var(--marker-color) 65%, transparent);
+  transition: transform 0.25s ease;
+}
+.civicx-marker:hover .civicx-marker-core { transform: scale(1.35); }
+.civicx-marker-halo {
+  position: absolute;
+  height: var(--marker-ring);
+  width: var(--marker-ring);
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--marker-color) 55%, transparent);
+  opacity: 0.75;
+}
+.civicx-marker-radar {
+  position: absolute;
+  height: 0.6rem;
+  width: 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--marker-color);
+  animation: civicx-radar 1.8s ease-out 4;
+}
+.civicx-pulse-strong { animation: civicx-halo 1.6s ease-in-out infinite; }
+.civicx-pulse-soft { animation: civicx-halo 2.6s ease-in-out infinite; }
+.civicx-pulse-min { animation: civicx-halo 3.6s ease-in-out infinite; }
+
+@keyframes civicx-halo {
+  0%, 100% { transform: scale(0.85); opacity: 0.28; }
+  50% { transform: scale(1.25); opacity: 0.8; }
+}
+@keyframes civicx-radar {
+  from { transform: scale(1); opacity: 0.85; }
+  to { transform: scale(6); opacity: 0; }
+}
+
+.civicx-marker-tip {
+  position: absolute;
+  bottom: 1.5rem;
+  display: none;
+  min-width: 11rem;
+  flex-direction: column;
+  gap: 0.15rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--marker-color) 35%, var(--border));
+  background: color-mix(in oklab, var(--background) 88%, transparent);
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+  backdrop-filter: blur(10px);
+}
+@media (hover: hover) and (pointer: fine) {
+  .civicx-marker:hover .civicx-marker-tip { display: flex; }
+}
+.civicx-marker-tip-title {
+  font-size: 0.72rem;
+  color: var(--foreground);
+  line-height: 1.2;
+}
+.civicx-marker-tip-meta {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  color: var(--muted-foreground);
+}
+
+.maplibregl-popup.civicx-popup-shell .maplibregl-popup-content {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.maplibregl-popup.civicx-popup-shell .maplibregl-popup-tip { display: none; }
+.maplibregl-popup.civicx-popup-shell .maplibregl-popup-close-button {
+  right: 0.5rem;
+  top: 0.35rem;
+  color: var(--muted-foreground);
+  font-size: 1.1rem;
+  background: transparent;
+}
+
+.civicx-popup {
+  border-radius: 1.15rem;
+  border: 1px solid color-mix(in oklab, var(--neon-cyan) 22%, var(--border));
+  background: color-mix(in oklab, var(--background) 82%, transparent);
+  backdrop-filter: blur(18px);
+  padding: 1rem 1.1rem 1.1rem;
+  box-shadow: var(--shadow-glow-cyan);
+  color: var(--foreground);
+}
+.civicx-popup-code {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  color: var(--neon-cyan);
+}
+.civicx-popup-title { margin-top: 0.4rem; font-size: 0.98rem; font-weight: 600; line-height: 1.25; }
+.civicx-popup-loc {
+  margin-top: 0.2rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: var(--muted-foreground);
+}
+.civicx-popup-chips { margin-top: 0.7rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.civicx-popup-chip {
+  border-radius: 0.55rem;
+  border: 1px solid color-mix(in oklab, var(--chip, var(--neon-cyan)) 40%, transparent);
+  background: color-mix(in oklab, var(--chip, var(--neon-cyan)) 10%, transparent);
+  padding: 0.15rem 0.5rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  color: var(--chip, var(--neon-cyan));
+}
+.civicx-popup-grid { margin-top: 0.8rem; display: grid; gap: 0.5rem; }
+.civicx-popup-grid dt {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.53rem;
+  letter-spacing: 0.16em;
+  color: var(--muted-foreground);
+}
+.civicx-popup-grid dd { margin: 0.15rem 0 0; font-size: 0.78rem; }
+.civicx-popup-label {
+  margin-top: 0.85rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.53rem;
+  letter-spacing: 0.16em;
+  color: var(--neon-violet);
+}
+.civicx-popup-summary { margin-top: 0.3rem; font-size: 0.78rem; line-height: 1.5; color: color-mix(in oklab, var(--foreground) 88%, transparent); }
+.civicx-popup-cta {
+  margin-top: 1rem;
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--neon-cyan) 40%, transparent);
+  background: color-mix(in oklab, var(--neon-cyan) 10%, transparent);
+  padding: 0.55rem 0.75rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  color: var(--neon-cyan);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.civicx-popup-cta:hover { color: var(--foreground); border-color: color-mix(in oklab, var(--neon-cyan) 70%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .civicx-marker-halo, .civicx-marker-radar { animation: none !important; }
+}
