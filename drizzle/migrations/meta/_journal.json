@@ -29,6 +29,13 @@
       "when": 1788619435976,
       "tag": "0003_enable_realtime_challenges",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788620884172,
+      "tag": "0004_university_challenge_discovery",
+      "breakpoints": true
     }
   ]
 }
