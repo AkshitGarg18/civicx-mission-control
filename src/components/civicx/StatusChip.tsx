@@ -5,6 +5,7 @@ export const priorityTone: Record<ChallengeNode["priority"], string> = {
   CRITICAL: "text-destructive border-destructive/40 bg-destructive/10",
   HIGH: "text-warn border-warn/40 bg-warn/10",
   MEDIUM: "text-cyan border-cyan/40 bg-cyan/10",
+  LOW: "text-muted-foreground border-border bg-muted/20",
 };
 
 const statusTone: Record<MissionStatus, string> = {
