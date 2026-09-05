@@ -53,9 +53,10 @@ export function NavBar() {
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
           "mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-2xl px-4 transition-all duration-500 lg:px-6",
-          scrolled
+          scrolled || open
             ? "glass py-2 shadow-[0_10px_40px_-18px_color-mix(in_oklab,var(--neon-cyan)_35%,transparent)]"
             : "border border-transparent bg-transparent py-4 backdrop-blur-[2px]",
+          open && "bg-background/95",
         )}
       >
         <a href="#top" className="flex min-w-0 items-center gap-2.5">
