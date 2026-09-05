@@ -23,7 +23,9 @@ import {
   type ReportCategory,
 } from "@/lib/citizen-data";
 import { AiAnalysis } from "./AiAnalysis";
+import { createChallenge } from "@/lib/challenges-service";
 import { cn } from "@/lib/utils";
+
 
 const steps = [
   { no: "01", key: "IDENTIFY", heading: "What's happening?" },
