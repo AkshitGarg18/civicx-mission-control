@@ -64,6 +64,15 @@ function kindFor(file: File): Evidence["kind"] {
   return "document";
 }
 
+/** "28.7495° N" -> 28.7495 (negative for S/W). */
+function parseCoord(raw?: string): number | null {
+  if (!raw) return null;
+  const value = Number.parseFloat(raw);
+  if (Number.isNaN(value)) return null;
+  return /[SW]/i.test(raw) ? -value : value;
+}
+
+
 const kindIcon = { photo: ImageIcon, video: Film, document: FileText } as const;
 
 export function ReportModal({ open, onClose }: { open: boolean; onClose: () => void }) {
