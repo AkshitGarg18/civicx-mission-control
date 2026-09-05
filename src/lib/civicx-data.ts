@@ -465,12 +465,42 @@ export const forces = [
   },
 ];
 
-export const steps = [
-  { no: "01", title: "REPORT", copy: "Citizen identifies a challenge." },
-  { no: "02", title: "ANALYZE", copy: "AI understands and categorizes it." },
-  { no: "03", title: "MATCH", copy: "The platform finds relevant university expertise." },
-  { no: "04", title: "COLLABORATE", copy: "Students and industry work together." },
-  { no: "05", title: "IMPACT", copy: "Government tracks measurable results." },
+export const steps: {
+  no: string;
+  title: string;
+  copy: string;
+  signal: MissionStatus;
+}[] = [
+  {
+    no: "01",
+    title: "REPORT",
+    copy: "A citizen reports a challenge with location and evidence.",
+    signal: "SIGNAL DETECTED",
+  },
+  {
+    no: "02",
+    title: "ANALYZE",
+    copy: "AI classifies the challenge, ranks priority and estimates who it affects.",
+    signal: "AI ANALYSIS COMPLETE",
+  },
+  {
+    no: "03",
+    title: "MATCH",
+    copy: "The platform finds university teams with the relevant expertise.",
+    signal: "TEAM FOUND",
+  },
+  {
+    no: "04",
+    title: "COLLABORATE",
+    copy: "Students and industry mentors build and pilot the solution together.",
+    signal: "INDUSTRY SUPPORT AVAILABLE",
+  },
+  {
+    no: "05",
+    title: "IMPACT",
+    copy: "Government authorities track measurable, auditable results.",
+    signal: "MISSION COMPLETED",
+  },
 ];
 
 export interface Signal {

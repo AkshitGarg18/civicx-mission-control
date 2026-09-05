@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { steps } from "@/lib/civicx-data";
 import { Reveal, SectionLabel } from "./Reveal";
+import { StatusChip } from "./StatusChip";
 
 export function HowItWorks() {
   return (
@@ -11,6 +12,9 @@ export function HowItWorks() {
           <h2 className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">
             How It <span className="text-gradient">Works.</span>
           </h2>
+          <p className="mt-4 text-muted-foreground">
+            Every challenge follows the same tracked path, with a status signal at each stage.
+          </p>
         </Reveal>
 
         <div className="relative mt-14">
@@ -35,6 +39,9 @@ export function HowItWorks() {
                   <h3 className="font-mono text-sm tracking-[0.22em] text-foreground">
                     {s.title}
                   </h3>
+                  <span className="mt-2 block">
+                    <StatusChip status={s.signal} />
+                  </span>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.copy}</p>
                 </li>
               </Reveal>
