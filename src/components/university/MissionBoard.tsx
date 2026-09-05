@@ -102,7 +102,7 @@ export function MissionBoard({
   return (
     <section id="mission-board" className="scroll-mt-24">
       <Reveal>
-        <SectionLabel>ACTIVE CIVIC MISSIONS</SectionLabel>
+        <SectionLabel>MISSION BOARD</SectionLabel>
         <h2 className="mt-4 text-xl font-semibold tracking-tight sm:text-2xl">
           ACTIVE CIVIC MISSIONS
         </h2>
