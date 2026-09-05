@@ -32,6 +32,12 @@ export interface ChallengeNode {
   description: string;
   aiAnalysis: string;
   skills: string[];
+  /** AI-detected stakeholders (live challenges only) */
+  stakeholders?: string[];
+  /** AI-suggested solution directions (live challenges only) */
+  directions?: string[];
+  /** true when the node comes from a stored challenge instead of demo data */
+  live?: boolean;
   /** percentage coordinates inside the visual canvas */
   x: number;
   y: number;
