@@ -25,13 +25,15 @@ import {
 } from "@/lib/citizen-data";
 import { AiAnalysis } from "./AiAnalysis";
 import {
-  applyChallengeAnalysis,
   createChallenge,
   uploadChallengeEvidence,
   CHALLENGE_CREATED_EVENT,
   NotAuthenticatedError,
 } from "@/lib/challenges-service";
-import { analyseChallenge, toAnalysisResult } from "@/lib/mock-analysis";
+import { useServerFn } from "@tanstack/react-start";
+import { analyzeChallenge } from "@/lib/analysis.functions";
+import { toAnalysisResult } from "@/lib/analysis-result";
+
 import { cn } from "@/lib/utils";
 
 
@@ -95,6 +97,10 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
   const [error, setError] = useState<string | null>(null);
   const [received, setReceived] = useState(false);
   const [analysis, setAnalysis] = useState<AiAnalysisResult | null>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [challengeId, setChallengeId] = useState<string | null>(null);
+  const runAnalysis = useServerFn(analyzeChallenge);
+
 
   const [draft, setDraft] = useState<ReportDraft>(emptyDraft);
   const [query, setQuery] = useState("");
@@ -122,7 +128,27 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
     setError(null);
     setReceived(false);
     setAnalysis(null);
+    setAnalysisError(null);
+    setChallengeId(null);
   };
+
+  /** Runs the server-side AI analysis for a stored challenge. */
+  const analyse = async (id: string) => {
+    setAnalysis(null);
+    setAnalysisError(null);
+    try {
+      const result = await runAnalysis({ data: { challengeId: id } });
+      setAnalysis(toAnalysisResult(result, id));
+      window.dispatchEvent(new Event(CHALLENGE_CREATED_EVENT));
+    } catch (err) {
+      console.error("[civicx] ai analysis failed", err);
+      setAnalysisError(
+        "Your challenge was saved, but AI analysis could not be completed. You can retry.",
+      );
+      window.dispatchEvent(new Event(CHALLENGE_CREATED_EVENT));
+    }
+  };
+
 
 
   const finish = () => {
@@ -201,19 +227,12 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
         );
       }
 
-      // TEMPORARY: local placeholder analysis, replaced by Gemini later.
-      const mock = analyseChallenge({
-        title: draft.title.trim(),
-        description: draft.description.trim(),
-        category: draft.category,
-        locationName: draft.location?.label ?? null,
-      });
-      await applyChallengeAnalysis(challenge.id, mock);
-      setAnalysis(toAnalysisResult(mock, challenge.id));
-
+      setChallengeId(challenge.id);
       window.dispatchEvent(new Event(CHALLENGE_CREATED_EVENT));
       setReceived(true);
       setTimeout(() => setPhase("analysis"), reduced ? 150 : 900);
+      void analyse(challenge.id);
+
     } catch (err) {
       console.error("[civicx] challenge transmission failed", err);
       setError(
@@ -686,8 +705,11 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                 <div className="mt-8">
                   <AiAnalysis
                     {...(analysis ? { result: analysis } : {})}
+                    {...(analysisError ? { error: analysisError } : {})}
+                    {...(challengeId ? { onRetry: () => void analyse(challengeId) } : {})}
                     onCreateMission={finish}
                   />
+
                 </div>
               )}
 

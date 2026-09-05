@@ -301,9 +301,9 @@ export const analysisSteps = [
   "Processing description",
   "Identifying category",
   "Estimating priority",
-  "Detecting duplicate reports",
-  "Identifying affected population",
-  "Finding relevant expertise",
+  "Detecting potential impact",
+  "Identifying relevant expertise",
+  "Generating solution directions",
 ] as const;
 
 export interface AiAnalysisResult {
@@ -313,6 +313,8 @@ export interface AiAnalysisResult {
   impact: string;
   skills: string[];
   summary: string;
+  stakeholders?: string[];
+  directions?: string[];
   missionCode: string;
 }
 

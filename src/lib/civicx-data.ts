@@ -6,7 +6,7 @@ export type ChallengeCategory =
   | "Infrastructure"
   | "Safety";
 
-export type Priority = "CRITICAL" | "HIGH" | "MEDIUM";
+export type Priority = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
 
 export type MissionStatus =
   | "SIGNAL DETECTED"
