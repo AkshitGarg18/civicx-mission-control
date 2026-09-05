@@ -101,7 +101,7 @@ Analyse the report and respond with ONLY a JSON object, no prose and no code fen
   "solution_directions": ["string", ...]
 }
 Rules:
-- Never invent precise real-world statistics. "estimated_impact" is a rough AI estimate of how many people are affected; if the report does not support any estimate, use null.
+- Never invent precise real-world statistics. "estimated_impact" is a rough AI estimate of the total number of PEOPLE affected (a whole head-count, never a score or rating); if the report does not support any estimate, use null.
 - Word the summary so it is clear the assessment is an AI estimate, not verified fact.
 - Base everything strictly on the citizen's report; do not claim to have detected duplicate reports or consulted external data.
 - Give 3-5 recommended skills, 2-4 affected stakeholders and 2-4 solution directions.`;
