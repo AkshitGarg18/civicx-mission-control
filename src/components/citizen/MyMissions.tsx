@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight, MapPin } from "lucide-react";
 import { Reveal, SectionLabel } from "@/components/civicx/Reveal";
@@ -5,6 +6,8 @@ import { MissionProgress } from "@/components/civicx/MissionProgress";
 import { PriorityChip, StatusChip } from "@/components/civicx/StatusChip";
 import { statusStage } from "@/lib/civicx-data";
 import { myMissions, type CitizenMission } from "@/lib/citizen-data";
+import { getMyChallenges, toCitizenMission } from "@/lib/challenges-service";
+
 
 function MissionRow({ mission, index }: { mission: CitizenMission; index: number }) {
   const reduced = useReducedMotion();
