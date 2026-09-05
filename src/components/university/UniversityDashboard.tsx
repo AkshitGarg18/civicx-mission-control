@@ -56,7 +56,7 @@ export function UniversityDashboard() {
       <div className="relative flex">
         <UniversitySidebar active={active} onNavigate={setActive} />
 
-        <main className="min-w-0 flex-1 px-4 pb-20 pt-6 sm:px-6 lg:px-10">
+        <main className="min-w-0 flex-1 px-4 pb-20 pt-6 sm:px-6 lg:pl-[18.5rem] lg:pr-10">
           <div className="mx-auto max-w-6xl space-y-14">
             <UniversityHeader />
 
