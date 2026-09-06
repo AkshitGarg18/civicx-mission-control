@@ -40,7 +40,7 @@ export function UniversityDashboard() {
   const [proposals, setProposals] = useState<ProposalRow[]>([]);
   const [reviewedTeams, setReviewedTeams] = useState<Set<string>>(new Set());
   const [collabStatuses, setCollabStatuses] = useState<Map<string, string>>(new Map());
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
 
   const load = useCallback(async () => {
     try {
@@ -149,7 +149,7 @@ export function UniversityDashboard() {
                   mission={
                     rows.find((r) => r.id === proposalTeam.team.mission_id) ?? null
                   }
-                  currentUserId={user?.id ?? null}
+                  currentUserId={currentUser?.id ?? null}
                   onBack={() => {
                     setProposalTeamId(null);
                     void loadProposals();
