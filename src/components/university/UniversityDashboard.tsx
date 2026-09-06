@@ -7,6 +7,8 @@ import {
   type ChallengeRow,
 } from "@/lib/challenges-service";
 import { getMyTeams, type TeamWithMembers } from "@/lib/teams-service";
+import { getMyProposals, type ProposalRow } from "@/lib/proposals-service";
+import { useAuth } from "@/lib/auth-context";
 import { UniversitySidebar } from "./UniversitySidebar";
 import { UniversityHeader } from "./UniversityHeader";
 import { UniversityStats } from "./UniversityStats";
@@ -15,12 +17,15 @@ import { UniversityMissionDetail } from "./UniversityMissionDetail";
 import { ComingSoonPanel } from "./ComingSoonPanel";
 import { TeamsPanel } from "./TeamsPanel";
 import { TeamDetail } from "./TeamDetail";
+import { ProposalWorkspace } from "./ProposalWorkspace";
+import { ProposalView } from "./ProposalView";
 
 /**
- * University mission control. Reads real challenge rows and real team records
- * through the RLS-backed services; nothing here is mock data.
+ * University mission control. Reads real challenge rows, real team records and
+ * real solution proposals through the RLS-backed services.
  */
 export function UniversityDashboard() {
+  const { currentUser } = useAuth();
   const [active, setActive] = useState("mission-board");
   const [rows, setRows] = useState<ChallengeRow[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -28,6 +33,9 @@ export function UniversityDashboard() {
   const [teams, setTeams] = useState<TeamWithMembers[]>([]);
   const [teamsLoaded, setTeamsLoaded] = useState(false);
   const [openTeamId, setOpenTeamId] = useState<string | null>(null);
+  const [proposals, setProposals] = useState<Map<string, ProposalRow>>(new Map());
+  const [stage, setStage] = useState<"team" | "workspace" | "proposal">("team");
+  const [autoReview, setAutoReview] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -43,6 +51,7 @@ export function UniversityDashboard() {
   const loadTeams = useCallback(async () => {
     try {
       setTeams(await getMyTeams());
+      setProposals(await getMyProposals());
     } catch (err) {
       console.error("[civicx] team records load failed", err);
     } finally {
@@ -72,6 +81,26 @@ export function UniversityDashboard() {
   };
 
   const openTeam = teams.find((t) => t.team.id === openTeamId) ?? null;
+  const openMission = openTeam
+    ? rows.find((r) => r.id === openTeam.team.mission_id) ?? null
+    : null;
+  const openProposal = openTeam ? proposals.get(openTeam.team.id) ?? null : null;
+  const isLeader = Boolean(
+    openTeam &&
+      currentUser &&
+      (openTeam.team.created_by === currentUser.id ||
+        openTeam.members.some((m) => m.user_id === currentUser.id && m.is_leader)),
+  );
+
+  const rememberProposal = (row: ProposalRow) => {
+    setProposals((prev) => new Map(prev).set(row.team_id, row));
+  };
+
+  const showTeam = (id: string) => {
+    setOpenTeamId(id);
+    setStage("team");
+    setAutoReview(false);
+  };
 
   return (
     <div className="relative min-h-screen">
@@ -82,6 +111,7 @@ export function UniversityDashboard() {
           active={active}
           onNavigate={(id) => {
             setOpenTeamId(null);
+            setStage("team");
             setActive(id);
           }}
         />
@@ -99,18 +129,55 @@ export function UniversityDashboard() {
 
             {active === "teams" &&
               (openTeam ? (
-                <TeamDetail
-                  entry={openTeam}
-                  mission={rows.find((r) => r.id === openTeam.team.mission_id) ?? null}
-                  onBack={() => setOpenTeamId(null)}
-                />
+                stage === "workspace" ? (
+                  <ProposalWorkspace
+                    entry={openTeam}
+                    mission={openMission}
+                    proposal={openProposal}
+                    userId={currentUser?.id ?? ""}
+                    isLeader={isLeader}
+                    onBack={() => setStage("team")}
+                    onSaved={rememberProposal}
+                    onSubmitted={(row) => {
+                      rememberProposal(row);
+                      setAutoReview(true);
+                      setStage("proposal");
+                      void load();
+                    }}
+                  />
+                ) : stage === "proposal" && openProposal ? (
+                  <ProposalView
+                    entry={openTeam}
+                    mission={openMission}
+                    proposal={openProposal}
+                    autoReview={autoReview}
+                    onBack={() => setStage("team")}
+                    onStatusChange={(status) => {
+                      rememberProposal({ ...openProposal, status });
+                      void load();
+                    }}
+                  />
+                ) : (
+                  <TeamDetail
+                    entry={openTeam}
+                    mission={openMission}
+                    proposal={openProposal}
+                    onBack={() => setOpenTeamId(null)}
+                    onCreateProposal={() => setStage("workspace")}
+                    onOpenProposal={() => {
+                      setAutoReview(false);
+                      setStage(openProposal?.status === "DRAFT" ? "workspace" : "proposal");
+                    }}
+                  />
+                )
               ) : (
                 <TeamsPanel
                   view="teams"
                   entries={teams}
                   missions={rows}
+                  proposals={proposals}
                   loaded={teamsLoaded}
-                  onOpenTeam={setOpenTeamId}
+                  onOpenTeam={showTeam}
                   onOpenMission={setDetailId}
                 />
               ))}
@@ -120,8 +187,9 @@ export function UniversityDashboard() {
                 view="missions"
                 entries={teams}
                 missions={rows}
+                proposals={proposals}
                 loaded={teamsLoaded}
-                onOpenTeam={setOpenTeamId}
+                onOpenTeam={showTeam}
                 onOpenMission={setDetailId}
               />
             )}
@@ -140,7 +208,7 @@ export function UniversityDashboard() {
         onViewTeam={(id) => {
           setDetailId(null);
           setActive("teams");
-          setOpenTeamId(id);
+          showTeam(id);
         }}
       />
     </div>
