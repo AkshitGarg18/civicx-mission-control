@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { ArrowLeft, Lock, Users } from "lucide-react";
 import { contributionArea, scoreStudent, teamCoverage, type TeamWithMembers } from "@/lib/teams-service";
 import type { ChallengeRow } from "@/lib/challenges-service";
+import { IndustrySignals } from "./IndustrySignals";
 
 /** Team Command Center for one stored team. */
 export function TeamDetail({
@@ -142,6 +143,8 @@ export function TeamDetail({
             LOCKED — COMPLETE TEAM FORMATION FIRST
           </p>
         </div>
+
+        <IndustrySignals teamId={entry.team.id} />
       </div>
     </motion.section>
   );
