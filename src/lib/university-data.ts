@@ -25,7 +25,7 @@ export const universityNav: UniversityNavItem[] = [
   { id: "recommended", label: "Recommended", icon: Sparkles, ready: false },
   { id: "my-missions", label: "My Missions", icon: Radar, ready: true },
   { id: "teams", label: "Teams", icon: Users, ready: true },
-  { id: "proposals", label: "Proposals", icon: FileStack, ready: false },
+  { id: "proposals", label: "Proposals", icon: FileStack, ready: true },
   { id: "impact", label: "Impact", icon: BarChart3, ready: false },
 ];
 
