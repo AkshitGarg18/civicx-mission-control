@@ -191,6 +191,135 @@ export type Database = {
         }
         Relationships: []
       }
+      proposal_reviews: {
+        Row: {
+          assessment: string
+          created_at: string
+          id: string
+          impact_potential: string
+          implementation_complexity: string
+          next_step: string
+          proposal_id: string
+          recommendations: string[]
+          risks: string[]
+          skill_alignment: string
+          strengths: string[]
+          technical_feasibility: string
+        }
+        Insert: {
+          assessment: string
+          created_at?: string
+          id?: string
+          impact_potential: string
+          implementation_complexity: string
+          next_step: string
+          proposal_id: string
+          recommendations?: string[]
+          risks?: string[]
+          skill_alignment: string
+          strengths?: string[]
+          technical_feasibility: string
+        }
+        Update: {
+          assessment?: string
+          created_at?: string
+          id?: string
+          impact_potential?: string
+          implementation_complexity?: string
+          next_step?: string
+          proposal_id?: string
+          recommendations?: string[]
+          risks?: string[]
+          skill_alignment?: string
+          strengths?: string[]
+          technical_feasibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_reviews_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "solution_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solution_proposals: {
+        Row: {
+          created_at: string
+          created_by: string
+          estimated_timeline: string
+          expected_impact: string
+          id: string
+          implementation_plan: Json
+          mission_id: string
+          problem_understanding: string
+          proposed_solution: string
+          resources_required: string[]
+          status: string
+          submitted_at: string | null
+          team_id: string
+          technologies: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          estimated_timeline?: string
+          expected_impact?: string
+          id?: string
+          implementation_plan?: Json
+          mission_id: string
+          problem_understanding?: string
+          proposed_solution?: string
+          resources_required?: string[]
+          status?: string
+          submitted_at?: string | null
+          team_id: string
+          technologies?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          estimated_timeline?: string
+          expected_impact?: string
+          id?: string
+          implementation_plan?: Json
+          mission_id?: string
+          problem_understanding?: string
+          proposed_solution?: string
+          resources_required?: string[]
+          status?: string
+          submitted_at?: string | null
+          team_id?: string
+          technologies?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solution_proposals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solution_proposals_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solution_proposals_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: true
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           contribution_area: string | null
@@ -288,6 +417,10 @@ export type Database = {
     Functions: {
       has_civic_role: {
         Args: { _role: string; _user_id: string }
+        Returns: boolean
+      }
+      is_team_leader: {
+        Args: { _team_id: string; _user_id: string }
         Returns: boolean
       }
       is_team_member: {
