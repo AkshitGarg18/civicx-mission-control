@@ -140,13 +140,39 @@ export function TeamDetail({
           })}
         </div>
 
-        <div className="glass-soft relative mt-4 rounded-xl border border-border p-4">
+        <div className="glass-soft relative mt-4 overflow-hidden rounded-xl border border-cyan/30 p-4">
+          <span className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-cyan/20 opacity-50 blur-3xl" />
           <p className="mono-label text-muted-foreground">NEXT PHASE</p>
-          <p className="mt-2 text-sm font-semibold">Solution Proposal</p>
-          <p className="mono-label mt-2 inline-flex items-center gap-2 text-warn">
-            <Lock className="h-3 w-3" />
-            LOCKED — COMPLETE TEAM FORMATION FIRST
-          </p>
+          <p className="relative mt-2 text-sm font-semibold">Solution Proposal</p>
+          {proposalStatus ? (
+            <p className="relative mt-2 text-sm text-muted-foreground">
+              {proposalStatusMeta[proposalStatus as ProposalStatus]?.caption ??
+                "Proposal record stored for this team."}
+            </p>
+          ) : (
+            <p className="relative mt-2 text-sm text-muted-foreground">
+              Turn this mission brief into a solution blueprint your team can deliver.
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={onOpenProposal}
+            className="relative mt-4 inline-flex items-center gap-2 rounded-xl border border-cyan/40 bg-cyan/10 px-4 py-2.5 font-mono text-[10px] tracking-[0.16em] text-cyan transition-colors hover:border-cyan/70"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            {proposalStatus ? "OPEN SOLUTION PROPOSAL" : "CREATE SOLUTION PROPOSAL"}
+          </button>
+          {proposalStatus && (
+            <span
+              className={`relative ml-3 inline-flex rounded-lg border px-2.5 py-1 font-mono text-[10px] tracking-[0.14em] ${
+                proposalStatusMeta[proposalStatus as ProposalStatus]?.tone ??
+                "text-muted-foreground border-border bg-muted/20"
+              }`}
+            >
+              {proposalStatusMeta[proposalStatus as ProposalStatus]?.label ??
+                proposalStatus.replace(/_/g, " ")}
+            </span>
+          )}
         </div>
 
         <IndustrySignals teamId={entry.team.id} />
