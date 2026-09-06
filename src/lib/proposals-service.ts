@@ -8,7 +8,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database, Json } from "@/integrations/supabase/types";
 
 export type ProposalRow = Database["public"]["Tables"]["solution_proposals"]["Row"];
 export type ProposalReviewRow = Database["public"]["Tables"]["proposal_reviews"]["Row"];
@@ -155,7 +155,7 @@ function payload(draft: ProposalDraft) {
     proposed_solution: draft.proposedSolution,
     technologies: draft.technologies,
     expected_impact: draft.expectedImpact,
-    implementation_plan: draft.implementationPlan as unknown as Database["public"]["Tables"]["solution_proposals"]["Insert"]["implementation_plan"],
+    implementation_plan: draft.implementationPlan as unknown as Json,
     estimated_timeline: draft.estimatedTimeline,
     resources_required: draft.resourcesRequired,
   };
