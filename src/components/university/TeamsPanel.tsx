@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { ArrowRight, Users } from "lucide-react";
 import type { ChallengeRow } from "@/lib/challenges-service";
 import { teamCoverage, type TeamWithMembers } from "@/lib/teams-service";
+import { proposalStatusLabel, type ProposalRow } from "@/lib/proposals-service";
 
 /**
  * Shared list used by both "Teams" and "My Missions" — the same stored teams,
@@ -11,6 +12,7 @@ export function TeamsPanel({
   view,
   entries,
   missions,
+  proposals,
   loaded,
   onOpenTeam,
   onOpenMission,
@@ -18,6 +20,7 @@ export function TeamsPanel({
   view: "teams" | "missions";
   entries: TeamWithMembers[];
   missions: ChallengeRow[];
+  proposals: Map<string, ProposalRow>;
   loaded: boolean;
   onOpenTeam: (teamId: string) => void;
   onOpenMission: (missionId: string) => void;
@@ -63,6 +66,7 @@ export function TeamsPanel({
             mission?.recommended_skills ?? null,
           );
           const percent = coverage.percent ?? entry.team.skill_coverage;
+          const proposal = proposals.get(entry.team.id) ?? null;
 
           return (
             <motion.article
@@ -96,6 +100,29 @@ export function TeamsPanel({
                   <p className="mono-label text-muted-foreground">SKILL COVERAGE</p>
                   <p className="mt-1.5 text-sm font-medium text-cyan">
                     {percent === null ? "—" : `${percent}%`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="glass-soft rounded-xl p-3.5">
+                  <p className="mono-label text-muted-foreground">PROPOSAL STATUS</p>
+                  <p className="mt-1.5 font-mono text-[10px] tracking-[0.14em] text-signal">
+                    {proposal
+                      ? proposalStatusLabel[proposal.status] ?? proposal.status
+                      : "NO PROPOSAL YET"}
+                  </p>
+                </div>
+                <div className="glass-soft rounded-xl p-3.5">
+                  <p className="mono-label text-muted-foreground">AI REVIEW STATUS</p>
+                  <p className="mt-1.5 font-mono text-[10px] tracking-[0.14em] text-cyan">
+                    {proposal?.status === "AI_REVIEW_COMPLETE"
+                      ? "AI REVIEW COMPLETE"
+                      : proposal?.status === "UNDER_AI_REVIEW"
+                        ? "AI REVIEW RUNNING"
+                        : proposal?.status === "AI_REVIEW_FAILED"
+                          ? "AI REVIEW UNAVAILABLE"
+                          : "NOT STARTED"}
                   </p>
                 </div>
               </div>
