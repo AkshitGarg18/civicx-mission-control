@@ -43,6 +43,13 @@
       "when": 1788622053759,
       "tag": "0005_create_team_formation",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788685615714,
+      "tag": "0006_create_industry_collaborations",
+      "breakpoints": true
     }
   ]
 }
