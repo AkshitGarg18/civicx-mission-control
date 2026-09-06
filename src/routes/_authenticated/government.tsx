@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RoleGate } from "@/components/auth/RoleGate";
-import { AmbientBackground } from "@/components/civicx/AmbientBackground";
-import { DashboardShell } from "@/components/civicx/DashboardShell";
+import { GovernmentDashboard } from "@/components/government/GovernmentDashboard";
 
 const title = "Government Console — Monitor & Measure Impact | CivicX";
 const description =
@@ -20,10 +19,7 @@ export const Route = createFileRoute("/_authenticated/government")({
   }),
   component: () => (
     <RoleGate role="government">
-    <div className="relative min-h-screen overflow-x-hidden">
-      <AmbientBackground />
-      <DashboardShell roleId="government" />
-    </div>
+      <GovernmentDashboard />
     </RoleGate>
   ),
 });

@@ -228,11 +228,13 @@ export type Database = {
           bio: string | null
           course: string | null
           created_at: string
+          department: string | null
           email: string | null
           expertise_areas: string[] | null
           id: string
           industry_domain: string | null
           institution: string | null
+          jurisdiction: string | null
           name: string | null
           organization_type: string | null
           role: string
@@ -246,11 +248,13 @@ export type Database = {
           bio?: string | null
           course?: string | null
           created_at?: string
+          department?: string | null
           email?: string | null
           expertise_areas?: string[] | null
           id: string
           industry_domain?: string | null
           institution?: string | null
+          jurisdiction?: string | null
           name?: string | null
           organization_type?: string | null
           role?: string
@@ -264,11 +268,13 @@ export type Database = {
           bio?: string | null
           course?: string | null
           created_at?: string
+          department?: string | null
           email?: string | null
           expertise_areas?: string[] | null
           id?: string
           industry_domain?: string | null
           institution?: string | null
+          jurisdiction?: string | null
           name?: string | null
           organization_type?: string | null
           role?: string
