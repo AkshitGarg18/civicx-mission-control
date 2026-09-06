@@ -264,3 +264,19 @@ export function isIndustryReady(
 ): boolean {
   return !!proposal && proposal.status === "AI_REVIEW_COMPLETE" && !!review;
 }
+
+/**
+ * Latest industry collaboration status per team, for the teams the signed-in
+ * user can read. RLS limits this to the caller's own teams.
+ */
+export async function getTeamCollaborationStatuses(): Promise<Map<string, string>> {
+  const { data, error } = await supabase
+    .from("industry_collaborations")
+    .select("team_id, status, created_at")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  const map = new Map<string, string>();
+  for (const row of data ?? []) if (!map.has(row.team_id)) map.set(row.team_id, row.status);
+  return map;
+}
