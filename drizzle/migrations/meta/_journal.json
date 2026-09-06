@@ -50,6 +50,13 @@
       "when": 1788685615714,
       "tag": "0006_create_industry_collaborations",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788687586508,
+      "tag": "0007_government_oversight_access",
+      "breakpoints": true
     }
   ]
 }
