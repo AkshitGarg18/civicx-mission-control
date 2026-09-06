@@ -89,8 +89,8 @@ export function OpportunitiesPanel({
           (feasibilityRank[a.review.technical_feasibility] ?? 0);
         if (diff !== 0) return diff;
         return (
-          priorityRank[b.mission?.priority ?? "MEDIUM"] -
-          priorityRank[a.mission?.priority ?? "MEDIUM"]
+          (priorityRank[b.mission?.priority ?? "MEDIUM"] ?? 0) -
+          (priorityRank[a.mission?.priority ?? "MEDIUM"] ?? 0)
         );
       }
       return (
