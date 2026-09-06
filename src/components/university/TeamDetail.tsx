@@ -1,18 +1,23 @@
 import { motion } from "motion/react";
-import { ArrowLeft, Lock, Users } from "lucide-react";
+import { ArrowLeft, FileText, Users } from "lucide-react";
 import { contributionArea, scoreStudent, teamCoverage, type TeamWithMembers } from "@/lib/teams-service";
 import type { ChallengeRow } from "@/lib/challenges-service";
+import { proposalStatusMeta, type ProposalStatus } from "@/lib/proposal-data";
 import { IndustrySignals } from "./IndustrySignals";
 
 /** Team Command Center for one stored team. */
 export function TeamDetail({
   entry,
   mission,
+  proposalStatus,
   onBack,
+  onOpenProposal,
 }: {
   entry: TeamWithMembers;
   mission: ChallengeRow | null;
+  proposalStatus: string | null;
   onBack: () => void;
+  onOpenProposal: () => void;
 }) {
   const recommended = mission?.recommended_skills ?? null;
   const members = entry.members.map((m) => ({
