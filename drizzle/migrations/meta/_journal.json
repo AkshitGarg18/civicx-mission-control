@@ -47,8 +47,8 @@
     {
       "idx": 6,
       "version": "7",
-      "when": 1788684398908,
-      "tag": "0006_create_solution_proposals",
+      "when": 1788685615714,
+      "tag": "0006_create_industry_collaborations",
       "breakpoints": true
     }
   ]

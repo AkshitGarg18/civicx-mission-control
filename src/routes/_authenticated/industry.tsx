@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RoleGate } from "@/components/auth/RoleGate";
-import { AmbientBackground } from "@/components/civicx/AmbientBackground";
-import { DashboardShell } from "@/components/civicx/DashboardShell";
+import { IndustryDashboard } from "@/components/industry/IndustryDashboard";
 
 const title = "Industry Console — Accelerate Solutions | CivicX";
 const description =
-  "The CivicX industry console: find promising solutions and accelerate them with mentorship, technology, resources and funding.";
+  "The CivicX industry console: find reviewed university solutions and accelerate them with mentorship, technology, resources and funding.";
 
 export const Route = createFileRoute("/_authenticated/industry")({
   head: () => ({
@@ -20,10 +19,8 @@ export const Route = createFileRoute("/_authenticated/industry")({
   }),
   component: () => (
     <RoleGate role="industry">
-    <div className="relative min-h-screen overflow-x-hidden">
-      <AmbientBackground />
-      <DashboardShell roleId="industry" />
-    </div>
+      <IndustryDashboard />
     </RoleGate>
   ),
 });
+

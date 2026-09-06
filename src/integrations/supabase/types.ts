@@ -152,17 +152,94 @@ export type Database = {
           },
         ]
       }
+      industry_collaborations: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          id: string
+          industry_user_id: string
+          message: string
+          next_step: string | null
+          proposal_id: string
+          status: string
+          support_types: string[]
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          id?: string
+          industry_user_id: string
+          message?: string
+          next_step?: string | null
+          proposal_id: string
+          status?: string
+          support_types?: string[]
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          industry_user_id?: string
+          message?: string
+          next_step?: string | null
+          proposal_id?: string
+          status?: string
+          support_types?: string[]
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "industry_collaborations_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "industry_collaborations_industry_user_id_fkey"
+            columns: ["industry_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "industry_collaborations_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "solution_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "industry_collaborations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           bio: string | null
           course: string | null
           created_at: string
           email: string | null
+          expertise_areas: string[] | null
           id: string
+          industry_domain: string | null
           institution: string | null
           name: string | null
+          organization_type: string | null
           role: string
           skills: string[] | null
+          support_capabilities: string[] | null
+          technologies: string[] | null
+          website: string | null
           year: string | null
         }
         Insert: {
@@ -170,11 +247,17 @@ export type Database = {
           course?: string | null
           created_at?: string
           email?: string | null
+          expertise_areas?: string[] | null
           id: string
+          industry_domain?: string | null
           institution?: string | null
           name?: string | null
+          organization_type?: string | null
           role?: string
           skills?: string[] | null
+          support_capabilities?: string[] | null
+          technologies?: string[] | null
+          website?: string | null
           year?: string | null
         }
         Update: {
@@ -182,11 +265,17 @@ export type Database = {
           course?: string | null
           created_at?: string
           email?: string | null
+          expertise_areas?: string[] | null
           id?: string
+          industry_domain?: string | null
           institution?: string | null
           name?: string | null
+          organization_type?: string | null
           role?: string
           skills?: string[] | null
+          support_capabilities?: string[] | null
+          technologies?: string[] | null
+          website?: string | null
           year?: string | null
         }
         Relationships: []
@@ -415,8 +504,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      challenge_has_industry_ready_proposal: {
+        Args: { _challenge_id: string }
+        Returns: boolean
+      }
       has_civic_role: {
         Args: { _role: string; _user_id: string }
+        Returns: boolean
+      }
+      is_industry_ready_proposal: {
+        Args: { _proposal_id: string }
         Returns: boolean
       }
       is_team_leader: {
@@ -429,6 +526,10 @@ export type Database = {
       }
       is_team_owner: {
         Args: { _team_id: string; _user_id: string }
+        Returns: boolean
+      }
+      team_has_industry_ready_proposal: {
+        Args: { _team_id: string }
         Returns: boolean
       }
     }
