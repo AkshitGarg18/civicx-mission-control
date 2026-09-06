@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { ArrowRight, Users } from "lucide-react";
 import type { ChallengeRow } from "@/lib/challenges-service";
 import { teamCoverage, type TeamWithMembers } from "@/lib/teams-service";
+import { buildStages, MissionPipeline } from "./MissionPipeline";
 
 /**
  * Shared list used by both "Teams" and "My Missions" — the same stored teams,
@@ -12,6 +13,9 @@ export function TeamsPanel({
   entries,
   missions,
   loaded,
+  proposalStatuses,
+  reviewedProposals,
+  collaborationStatuses,
   onOpenTeam,
   onOpenMission,
 }: {
@@ -19,6 +23,12 @@ export function TeamsPanel({
   entries: TeamWithMembers[];
   missions: ChallengeRow[];
   loaded: boolean;
+  /** team id -> stored proposal status */
+  proposalStatuses: Map<string, string>;
+  /** team ids whose proposal has a stored AI review */
+  reviewedProposals: Set<string>;
+  /** team id -> latest industry collaboration status */
+  collaborationStatuses: Map<string, string>;
   onOpenTeam: (teamId: string) => void;
   onOpenMission: (missionId: string) => void;
 }) {
@@ -99,6 +109,17 @@ export function TeamsPanel({
                   </p>
                 </div>
               </div>
+
+              {view === "missions" && (
+                <MissionPipeline
+                  stages={buildStages({
+                    teamStatus: entry.team.status,
+                    proposalStatus: proposalStatuses.get(entry.team.id) ?? null,
+                    hasReview: reviewedProposals.has(entry.team.id),
+                    collaborationStatus: collaborationStatuses.get(entry.team.id) ?? null,
+                  })}
+                />
+              )}
 
               <div className="relative mt-4 flex items-center justify-between gap-3">
                 <span className="font-mono text-[10px] tracking-[0.14em] text-signal">
