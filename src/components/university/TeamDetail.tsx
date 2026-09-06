@@ -143,13 +143,45 @@ export function TeamDetail({
         </div>
 
         <div className="glass-soft relative mt-4 rounded-xl border border-border p-4">
-          <p className="mono-label text-muted-foreground">NEXT PHASE</p>
-          <p className="mt-2 text-sm font-semibold">Solution Proposal</p>
-          <p className="mono-label mt-2 inline-flex items-center gap-2 text-warn">
-            <Lock className="h-3 w-3" />
-            LOCKED — COMPLETE TEAM FORMATION FIRST
+          <p className="mono-label text-cyan/90">SOLUTION WORKSPACE</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Turn your team&rsquo;s expertise into an actionable solution.
           </p>
+
+          {proposal ? (
+            <>
+              <p className="mono-label mt-4 text-muted-foreground">PROPOSAL STATUS</p>
+              <p className="mt-1.5 font-mono text-[11px] font-semibold tracking-[0.14em] text-signal">
+                {proposalStatusLabel[proposal.status] ?? proposal.status}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={onOpenProposal}
+                  className="inline-flex items-center gap-2 rounded-xl border border-cyan/50 bg-cyan/10 px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.16em] text-cyan transition-colors hover:border-cyan"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  {proposal.status === "DRAFT" ? "OPEN PROPOSAL" : "VIEW PROPOSAL"}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="mono-label mt-4 text-muted-foreground">
+                NO SOLUTION PROPOSAL YET
+              </p>
+              <button
+                type="button"
+                onClick={onCreateProposal}
+                className="mt-4 inline-flex items-center gap-2 rounded-xl border border-cyan/60 bg-cyan/15 px-4 py-2.5 font-mono text-[10px] font-semibold tracking-[0.16em] text-cyan transition-colors hover:border-cyan"
+              >
+                <FileText className="h-3.5 w-3.5" />
+                CREATE SOLUTION PROPOSAL
+              </button>
+            </>
+          )}
         </div>
+
       </div>
     </motion.section>
   );
