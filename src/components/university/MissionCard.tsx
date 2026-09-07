@@ -3,6 +3,9 @@ import { ArrowRight, MapPin, Users } from "lucide-react";
 import { PriorityChip, StatusChip } from "@/components/civicx/StatusChip";
 import { statusMap, type ChallengeRow } from "@/lib/challenges-service";
 import { categoryLabel } from "@/lib/university-data";
+import { useAuth } from "@/lib/auth-context";
+import { scoreStudent } from "@/lib/teams-service";
+
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-IN", {
@@ -20,9 +23,30 @@ export function MissionCard({
   onView: (id: string) => void;
 }) {
   const reduced = useReducedMotion();
+  const { currentProfile } = useAuth();
   const status = statusMap[row.status] ?? "SIGNAL DETECTED";
   const priority = (row.priority as "CRITICAL" | "HIGH" | "MEDIUM" | "LOW") ?? "MEDIUM";
   const skills = row.recommended_skills ?? [];
+
+  /** Own match, computed only from the operator's real saved skills. */
+  const mySkills = currentProfile?.skills ?? [];
+  const myMatch =
+    mySkills.length === 0
+      ? null
+      : scoreStudent(
+          {
+            id: currentProfile?.id ?? "self",
+            name: null,
+            institution: null,
+            course: null,
+            year: null,
+            bio: null,
+            skills: mySkills,
+          },
+          row.recommended_skills,
+        ).matchPercent;
+
+
 
   return (
     <motion.article
@@ -68,13 +92,29 @@ export function MissionCard({
         </div>
         <div className="glass-soft rounded-xl p-3.5">
           <p className="mono-label text-muted-foreground">AI MATCH</p>
-          <p className="mt-2 font-mono text-[10px] tracking-[0.14em] text-violet">
-            PROFILE REQUIRED
-          </p>
-          <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-            Complete your university profile to receive AI-powered mission matching.
-          </p>
+          {mySkills.length === 0 ? (
+            <>
+              <p className="mt-2 font-mono text-[10px] tracking-[0.14em] text-violet">
+                SKILL PROFILE INCOMPLETE
+              </p>
+              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                Matching unavailable until skills are added.
+              </p>
+            </>
+          ) : myMatch === null ? (
+            <p className="mt-2 font-mono text-[10px] tracking-[0.14em] text-violet">
+              MATCHING UNAVAILABLE
+            </p>
+          ) : (
+            <>
+              <p className="mt-2 text-lg font-semibold text-cyan">{myMatch}%</p>
+              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                Based on your saved skill profile.
+              </p>
+            </>
+          )}
         </div>
+
       </div>
 
       {skills.length > 0 && (
