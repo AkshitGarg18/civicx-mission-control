@@ -19,7 +19,17 @@ import {
 
 type Phase = "matching" | "build" | "confirm" | "success";
 
+/** True when a student's own skill label satisfies one of the matched needs. */
+function isMatchingSkill(skill: string, matching: string[]): boolean {
+  const x = skill.trim().toLowerCase();
+  return matching.some((m) => {
+    const y = m.trim().toLowerCase();
+    return x === y || x.includes(y) || y.includes(x);
+  });
+}
+
 function SkillChip({ label, tone = "cyan" }: { label: string; tone?: "cyan" | "violet" }) {
+
   return (
     <span
       className={
