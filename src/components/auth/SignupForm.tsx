@@ -39,7 +39,9 @@ export function SignupForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [role, setRole] = useState<RoleId>(initialRole ?? "citizen");
+  // No silent default: an unchosen role used to save everyone as a citizen,
+  // which quietly kept students out of university team discovery.
+  const [role, setRole] = useState<RoleId | null>(initialRole ?? null);
   const [institution, setInstitution] = useState("");
   const [state, setState] = useState<State>("idle");
   const [message, setMessage] = useState<string | undefined>();
@@ -61,6 +63,11 @@ export function SignupForm({
     if (password !== confirm) {
       setState("denied");
       setMessage("The two passwords do not match.");
+      return;
+    }
+    if (!role) {
+      setState("denied");
+      setMessage("Select the role you represent to continue.");
       return;
     }
     if (role !== "citizen" && !institution.trim()) {
@@ -113,7 +120,7 @@ export function SignupForm({
           Already have an account?{" "}
           <Link
             to="/login"
-            search={authSearch(role, redirect)}
+            search={authSearch(role ?? undefined, redirect)}
             className="text-cyan underline-offset-4 transition-colors hover:underline"
           >
             Sign in
@@ -157,7 +164,9 @@ export function SignupForm({
         />
 
         <div className="pt-2">
-          <p className="mono-label text-muted-foreground">SELECT YOUR ROLE</p>
+          <p className="mono-label text-muted-foreground">
+            SELECT YOUR ROLE {role ? null : <span className="text-cyan">· REQUIRED</span>}
+          </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {roles.map((r) => {
               const Icon = r.icon;
@@ -214,11 +223,13 @@ export function SignupForm({
         </div>
 
         <AuthField
-          label={orgLabel[role]}
+          label={role ? orgLabel[role] : "ORGANISATION"}
           value={institution}
           onChange={setInstitution}
-          optional={role === "citizen"}
-          placeholder={role === "citizen" ? "Community group, if any" : "Required"}
+          optional={!role || role === "citizen"}
+          placeholder={
+            !role || role === "citizen" ? "Community group, if any" : "Required"
+          }
           autoComplete="organization"
         />
 
