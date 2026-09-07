@@ -184,13 +184,14 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
                 placeholder="e.g. B.Tech CSE"
               />
               <Field label="YEAR" value={year} onChange={setYear} placeholder="e.g. 2nd Year" />
-              <Field
-                label="SKILLS (COMMA SEPARATED)"
-                value={skills}
-                onChange={setSkills}
-                placeholder="Python, Machine Learning, IoT, GIS"
-              />
               <Field label="BIO" value={bio} onChange={setBio} multiline />
+              <div className="border-t border-border py-4">
+                <p className="mono-label text-muted-foreground">EDIT SKILL PROFILE</p>
+                <div className="mt-3">
+                  <SkillPicker value={skills} onChange={setSkills} />
+                </div>
+              </div>
+
             </div>
 
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
