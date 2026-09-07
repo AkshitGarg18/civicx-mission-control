@@ -293,22 +293,38 @@ export function TeamFormationModal({
                 <div className="relative mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
                   {/* Top matches */}
                   <div>
-                    <p className="mono-label text-muted-foreground">TOP MATCHES</p>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="mono-label text-muted-foreground">
+                        {skillFilter ? `STUDENTS WITH ${skillFilter.toUpperCase()}` : "TOP MATCHES"}
+                      </p>
+                      {skillFilter && (
+                        <button
+                          type="button"
+                          onClick={() => setSkillFilter(null)}
+                          className="font-mono text-[9px] tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          CLEAR FILTER
+                        </button>
+                      )}
+                    </div>
                     {loadError && (
                       <p className="mt-3 text-sm text-destructive">{loadError}</p>
                     )}
-                    {!loadError && students.length === 0 && (
+                    {!loadError && visibleStudents.length === 0 && (
                       <div className="glass-soft mt-3 rounded-xl px-5 py-10 text-center">
                         <p className="mono-label text-muted-foreground">
                           NO MATCHING STUDENTS FOUND
                         </p>
                         <p className="mt-3 text-sm text-muted-foreground">
-                          Invite students to complete their CivicX skill profiles.
+                          {skillFilter
+                            ? "No university student has saved this skill yet."
+                            : "Invite students to complete their CivicX skill profiles."}
                         </p>
                       </div>
                     )}
                     <div className="mt-3 space-y-3">
-                      {students.map((s) => {
+                      {visibleStudents.map((s) => {
+
                         const inTeam = selected.includes(s.id);
                         const isSelf = s.id === currentProfile?.id;
                         return (
@@ -483,14 +499,32 @@ export function TeamFormationModal({
                             <div className="mt-4 rounded-xl border border-warn/30 bg-warn/5 p-3">
                               <p className="mono-label text-warn">SKILL GAP DETECTED</p>
                               <p className="mt-1.5 text-xs text-muted-foreground">
-                                {coverage.missing.join(", ")}{" "}
-                                {coverage.missing.length === 1 ? "expertise is" : "skills are"}{" "}
-                                currently missing.
+                                Your team is missing: {coverage.missing.join(", ")}
                               </p>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {coverage.missing.map((skill) => (
+                                  <button
+                                    key={skill}
+                                    type="button"
+                                    onClick={() =>
+                                      setSkillFilter(skillFilter === skill ? null : skill)
+                                    }
+                                    className={
+                                      skillFilter === skill
+                                        ? "rounded-xl border border-warn/60 bg-warn/15 px-3 py-1.5 font-mono text-[9px] font-semibold tracking-[0.14em] text-warn"
+                                        : "rounded-xl border border-border px-3 py-1.5 font-mono text-[9px] tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+                                    }
+                                  >
+                                    {skillFilter === skill ? "SHOWING · " : "FIND A STUDENT WITH · "}
+                                    {skill.toUpperCase()}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
                           ) : (
                             <p className="mono-label mt-4 text-signal">MISSION READY</p>
                           )}
+
                         </>
                       )}
                     </div>
