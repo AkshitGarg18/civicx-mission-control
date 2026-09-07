@@ -332,20 +332,33 @@ export function TeamFormationModal({
 
                             {s.skills.length > 0 ? (
                               <div className="mt-3 flex flex-wrap gap-2">
-                                {s.skills.map((k) => (
-                                  <span
-                                    key={k}
-                                    className="rounded-lg border border-border px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-muted-foreground"
-                                  >
-                                    {k}
-                                  </span>
-                                ))}
+                                {s.skills.map((k) => {
+                                  const hit = isMatchingSkill(k, s.matchingSkills);
+                                  return (
+                                    <span
+                                      key={k}
+                                      className={
+                                        hit
+                                          ? "inline-flex items-center gap-1.5 rounded-lg border border-cyan/40 bg-cyan/10 px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-cyan"
+                                          : "rounded-lg border border-border px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-muted-foreground"
+                                      }
+                                    >
+                                      {k}
+                                      {hit && <Check className="h-3 w-3" />}
+                                    </span>
+                                  );
+                                })}
                               </div>
                             ) : (
                               <p className="mt-3 font-mono text-[10px] tracking-[0.14em] text-violet">
                                 SKILL PROFILE INCOMPLETE
                               </p>
                             )}
+
+                            {s.bio && (
+                              <p className="mt-3 text-xs text-muted-foreground">{s.bio}</p>
+                            )}
+
 
                             {s.matchingSkills.length > 0 && (
                               <div className="mt-3">
