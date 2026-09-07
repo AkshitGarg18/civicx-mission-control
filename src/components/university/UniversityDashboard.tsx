@@ -23,6 +23,8 @@ import { UniversityMissionDetail } from "./UniversityMissionDetail";
 import { ComingSoonPanel } from "./ComingSoonPanel";
 import { TeamsPanel } from "./TeamsPanel";
 import { TeamDetail } from "./TeamDetail";
+import { SkillOnboarding } from "./SkillOnboarding";
+
 
 /**
  * University mission control. Reads real challenge rows and real team records
