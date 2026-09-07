@@ -23,9 +23,30 @@ export function MissionCard({
   onView: (id: string) => void;
 }) {
   const reduced = useReducedMotion();
+  const { currentProfile } = useAuth();
   const status = statusMap[row.status] ?? "SIGNAL DETECTED";
   const priority = (row.priority as "CRITICAL" | "HIGH" | "MEDIUM" | "LOW") ?? "MEDIUM";
   const skills = row.recommended_skills ?? [];
+
+  /** Own match, computed only from the operator's real saved skills. */
+  const mySkills = currentProfile?.skills ?? [];
+  const myMatch =
+    mySkills.length === 0
+      ? null
+      : scoreStudent(
+          {
+            id: currentProfile?.id ?? "self",
+            name: null,
+            institution: null,
+            course: null,
+            year: null,
+            bio: null,
+            skills: mySkills,
+          },
+          row.recommended_skills,
+        ).matchPercent;
+
+
 
   return (
     <motion.article
