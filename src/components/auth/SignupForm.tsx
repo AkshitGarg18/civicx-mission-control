@@ -223,11 +223,13 @@ export function SignupForm({
         </div>
 
         <AuthField
-          label={orgLabel[role]}
+          label={role ? orgLabel[role] : "ORGANISATION"}
           value={institution}
           onChange={setInstitution}
-          optional={role === "citizen"}
-          placeholder={role === "citizen" ? "Community group, if any" : "Required"}
+          optional={!role || role === "citizen"}
+          placeholder={
+            !role || role === "citizen" ? "Community group, if any" : "Required"
+          }
           autoComplete="organization"
         />
 
