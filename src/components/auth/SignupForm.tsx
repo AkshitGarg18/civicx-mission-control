@@ -164,7 +164,9 @@ export function SignupForm({
         />
 
         <div className="pt-2">
-          <p className="mono-label text-muted-foreground">SELECT YOUR ROLE</p>
+          <p className="mono-label text-muted-foreground">
+            SELECT YOUR ROLE {role ? null : <span className="text-cyan">· REQUIRED</span>}
+          </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {roles.map((r) => {
               const Icon = r.icon;
