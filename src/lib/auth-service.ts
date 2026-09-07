@@ -32,16 +32,24 @@ function friendly(raw: string): string {
     return "This account still needs to be confirmed. Check your inbox for the confirmation link.";
   if (m.includes("already registered") || m.includes("already been registered"))
     return "An account already exists for this email. Try signing in instead.";
-  if (m.includes("password") && m.includes("6"))
+  // Supabase rejects passwords found in known breach lists — this used to fall
+  // through to the generic network message, which hid the real reason.
+  if (m.includes("weak") || m.includes("easy to guess") || m.includes("pwned"))
+    return "That password is too easy to guess. Choose a longer, more unusual password.";
+  if (m.includes("password") && (m.includes("6") || m.includes("should be at least")))
     return "Password must be at least 6 characters long.";
+  if (m.includes("signups not allowed") || m.includes("signup is disabled"))
+    return "New accounts are not being accepted right now. Try again later.";
   if (m.includes("rate limit") || m.includes("too many"))
     return "Too many attempts. Wait a moment and try again.";
   if (m.includes("invalid") && m.includes("email"))
     return "That email address does not look valid.";
-  if (m.includes("network") || m.includes("fetch"))
+  if (m.includes("network") || m.includes("fetch") || m.includes("failed to fetch"))
     return "Could not reach the CivicX network. Check your connection and retry.";
-  return "Something went wrong while contacting the network. Please try again.";
+  // Anything unmapped: show the underlying reason instead of blaming the network.
+  return raw.trim() || "Something went wrong. Please try again.";
 }
+
 
 export async function signInWithEmail(
   email: string,
