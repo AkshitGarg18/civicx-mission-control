@@ -72,7 +72,7 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
   const [course, setCourse] = useState("");
   const [year, setYear] = useState("");
   const [bio, setBio] = useState("");
-  const [skills, setSkills] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -84,7 +84,7 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
     setCourse(currentProfile.course ?? "");
     setYear(currentProfile.year ?? "");
     setBio(currentProfile.bio ?? "");
-    setSkills((currentProfile.skills ?? []).join(", "));
+    setSkills(currentProfile.skills ?? []);
   }, [currentProfile]);
 
   const save = async () => {
@@ -99,7 +99,7 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
         course: course.trim() || null,
         year: year.trim() || null,
         bio: bio.trim() || null,
-        skills: parseSkills(skills),
+        skills,
       });
       await refreshProfile();
       setMessage("PROFILE SYNCHRONISED");
@@ -140,14 +140,29 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
 
         {view === "profile" ? (
           <div className="mt-6">
-            {skillsMissing && (
+            {skillsMissing ? (
               <div className="rounded-xl border border-violet/30 bg-violet/5 p-4">
                 <p className="mono-label text-violet">SKILL PROFILE INCOMPLETE</p>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Add your skills below so CivicX can match you to civic missions.
                 </p>
               </div>
+            ) : (
+              <div className="rounded-xl border border-signal/30 bg-signal/5 p-4">
+                <p className="mono-label text-signal">SKILL PROFILE COMPLETE</p>
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  {(currentProfile?.skills ?? []).map((s) => (
+                    <span
+                      key={s}
+                      className="rounded-lg border border-cyan/30 bg-cyan/5 px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-cyan"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
             )}
+
 
             <div className="mt-4">
               <Field label="NAME" value={name} onChange={setName} />
