@@ -65,6 +65,11 @@ export function SignupForm({
       setMessage("The two passwords do not match.");
       return;
     }
+    if (!role) {
+      setState("denied");
+      setMessage("Select the role you represent to continue.");
+      return;
+    }
     if (role !== "citizen" && !institution.trim()) {
       setState("denied");
       setMessage(`Enter your ${orgLabel[role].toLowerCase()} to continue.`);
