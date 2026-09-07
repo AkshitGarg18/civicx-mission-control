@@ -120,7 +120,7 @@ export function SignupForm({
           Already have an account?{" "}
           <Link
             to="/login"
-            search={authSearch(role, redirect)}
+            search={authSearch(role ?? undefined, redirect)}
             className="text-cyan underline-offset-4 transition-colors hover:underline"
           >
             Sign in
