@@ -4,7 +4,9 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { roleById } from "@/lib/civicx-roles";
-import { parseSkills, updateMyProfile } from "@/lib/profile-service";
+import { updateMyProfile } from "@/lib/profile-service";
+import { SkillPicker } from "@/components/university/SkillPicker";
+
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
