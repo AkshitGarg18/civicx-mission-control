@@ -140,6 +140,16 @@ export function TeamFormationModal({
     [selectedMembers, recommended],
   );
 
+  /**
+   * Students shown in the list. With a skill gap filter active, only students
+   * whose own saved skills cover that missing skill are shown.
+   */
+  const visibleStudents = useMemo(() => {
+    if (!skillFilter) return students;
+    return students.filter((s) => isMatchingSkill(skillFilter, s.skills));
+  }, [students, skillFilter]);
+
+
   const toggle = (id: string) => {
     setSaveError(null);
     setSelected((prev) => {
