@@ -121,8 +121,25 @@ export function UniversityDashboard() {
   const openTeam = teams.find((t) => t.team.id === openTeamId) ?? null;
   const proposalTeam = teams.find((t) => t.team.id === proposalTeamId) ?? null;
 
+  /** First-run skill setup: shown until skills exist, or the user skips it. */
+  const needsSkillSetup =
+    !loading && !!currentProfile && (currentProfile.skills ?? []).length === 0;
+
+  if (needsSkillSetup && !skippedSetup) {
+    return (
+      <div className="relative min-h-screen">
+        <AmbientBackground />
+        <SkillOnboarding
+          onDone={() => setSkippedSetup(false)}
+          onSkip={() => setSkippedSetup(true)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen">
+
       <AmbientBackground />
 
       <div className="relative flex">
