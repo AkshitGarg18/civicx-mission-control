@@ -42,7 +42,9 @@ export function UniversityDashboard() {
   const [proposals, setProposals] = useState<ProposalRow[]>([]);
   const [reviewedTeams, setReviewedTeams] = useState<Set<string>>(new Set());
   const [collabStatuses, setCollabStatuses] = useState<Map<string, string>>(new Map());
-  const { currentUser } = useAuth();
+  const { currentUser, currentProfile, loading } = useAuth();
+  const [skippedSetup, setSkippedSetup] = useState(false);
+
 
   const load = useCallback(async () => {
     try {
