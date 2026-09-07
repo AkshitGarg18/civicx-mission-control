@@ -39,7 +39,9 @@ export function SignupForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [role, setRole] = useState<RoleId>(initialRole ?? "citizen");
+  // No silent default: an unchosen role used to save everyone as a citizen,
+  // which quietly kept students out of university team discovery.
+  const [role, setRole] = useState<RoleId | null>(initialRole ?? null);
   const [institution, setInstitution] = useState("");
   const [state, setState] = useState<State>("idle");
   const [message, setMessage] = useState<string | undefined>();
