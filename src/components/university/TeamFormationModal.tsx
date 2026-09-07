@@ -85,6 +85,8 @@ export function TeamFormationModal({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [createdTeamId, setCreatedTeamId] = useState<string | null>(null);
+  const [skillFilter, setSkillFilter] = useState<string | null>(null);
+
 
   const recommended = challenge?.recommended_skills ?? null;
   const hasRecommended = (recommended ?? []).length > 0;
@@ -100,6 +102,8 @@ export function TeamFormationModal({
     setSaveError(null);
     setLoadError(null);
     setCreatedTeamId(null);
+    setSkillFilter(null);
+
 
     void (async () => {
       const started = Date.now();
