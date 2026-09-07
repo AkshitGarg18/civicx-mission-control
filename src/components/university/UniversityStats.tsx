@@ -41,6 +41,7 @@ export function UniversityStats({
               institution: null,
               course: null,
               year: null,
+              bio: null,
               skills: mySkills,
             },
             r.recommended_skills,
