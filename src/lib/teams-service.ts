@@ -22,6 +22,7 @@ export interface StudentProfile {
   institution: string | null;
   course: string | null;
   year: string | null;
+  bio: string | null;
   skills: string[];
 }
 
@@ -107,7 +108,7 @@ export function contributionArea(matching: string[], skills: string[]): string {
 export async function getDiscoverableStudents(): Promise<StudentProfile[]> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, name, institution, course, year, skills")
+    .select("id, name, institution, course, year, bio, skills")
     .eq("role", "university");
 
   if (error) throw error;
@@ -117,6 +118,7 @@ export async function getDiscoverableStudents(): Promise<StudentProfile[]> {
     institution: p.institution,
     course: p.course,
     year: p.year,
+    bio: p.bio,
     skills: p.skills ?? [],
   }));
 }
@@ -139,7 +141,7 @@ export async function getMyTeams(): Promise<TeamWithMembers[]> {
   const ids = teams.map((t) => t.id);
   const [{ data: members }, { data: profiles }] = await Promise.all([
     supabase.from("team_members").select("*").in("team_id", ids),
-    supabase.from("profiles").select("id, name, institution, course, year, skills"),
+    supabase.from("profiles").select("id, name, institution, course, year, bio, skills"),
   ]);
 
   const byId = new Map<string, StudentProfile>();
@@ -150,6 +152,7 @@ export async function getMyTeams(): Promise<TeamWithMembers[]> {
       institution: p.institution,
       course: p.course,
       year: p.year,
+      bio: p.bio,
       skills: p.skills ?? [],
     });
   }

@@ -23,6 +23,8 @@ import { UniversityMissionDetail } from "./UniversityMissionDetail";
 import { ComingSoonPanel } from "./ComingSoonPanel";
 import { TeamsPanel } from "./TeamsPanel";
 import { TeamDetail } from "./TeamDetail";
+import { SkillOnboarding } from "./SkillOnboarding";
+
 
 /**
  * University mission control. Reads real challenge rows and real team records
@@ -40,7 +42,9 @@ export function UniversityDashboard() {
   const [proposals, setProposals] = useState<ProposalRow[]>([]);
   const [reviewedTeams, setReviewedTeams] = useState<Set<string>>(new Set());
   const [collabStatuses, setCollabStatuses] = useState<Map<string, string>>(new Map());
-  const { currentUser } = useAuth();
+  const { currentUser, currentProfile, loading } = useAuth();
+  const [skippedSetup, setSkippedSetup] = useState(false);
+
 
   const load = useCallback(async () => {
     try {
@@ -117,8 +121,25 @@ export function UniversityDashboard() {
   const openTeam = teams.find((t) => t.team.id === openTeamId) ?? null;
   const proposalTeam = teams.find((t) => t.team.id === proposalTeamId) ?? null;
 
+  /** First-run skill setup: shown until skills exist, or the user skips it. */
+  const needsSkillSetup =
+    !loading && !!currentProfile && (currentProfile.skills ?? []).length === 0;
+
+  if (needsSkillSetup && !skippedSetup) {
+    return (
+      <div className="relative min-h-screen">
+        <AmbientBackground />
+        <SkillOnboarding
+          onDone={() => setSkippedSetup(false)}
+          onSkip={() => setSkippedSetup(true)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen">
+
       <AmbientBackground />
 
       <div className="relative flex">

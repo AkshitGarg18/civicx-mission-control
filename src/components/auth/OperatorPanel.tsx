@@ -4,7 +4,9 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { roleById } from "@/lib/civicx-roles";
-import { parseSkills, updateMyProfile } from "@/lib/profile-service";
+import { updateMyProfile } from "@/lib/profile-service";
+import { SkillPicker } from "@/components/university/SkillPicker";
+
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -70,7 +72,7 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
   const [course, setCourse] = useState("");
   const [year, setYear] = useState("");
   const [bio, setBio] = useState("");
-  const [skills, setSkills] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +84,7 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
     setCourse(currentProfile.course ?? "");
     setYear(currentProfile.year ?? "");
     setBio(currentProfile.bio ?? "");
-    setSkills((currentProfile.skills ?? []).join(", "));
+    setSkills(currentProfile.skills ?? []);
   }, [currentProfile]);
 
   const save = async () => {
@@ -97,7 +99,7 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
         course: course.trim() || null,
         year: year.trim() || null,
         bio: bio.trim() || null,
-        skills: parseSkills(skills),
+        skills,
       });
       await refreshProfile();
       setMessage("PROFILE SYNCHRONISED");
@@ -138,14 +140,29 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
 
         {view === "profile" ? (
           <div className="mt-6">
-            {skillsMissing && (
+            {skillsMissing ? (
               <div className="rounded-xl border border-violet/30 bg-violet/5 p-4">
                 <p className="mono-label text-violet">SKILL PROFILE INCOMPLETE</p>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Add your skills below so CivicX can match you to civic missions.
                 </p>
               </div>
+            ) : (
+              <div className="rounded-xl border border-signal/30 bg-signal/5 p-4">
+                <p className="mono-label text-signal">SKILL PROFILE COMPLETE</p>
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  {(currentProfile?.skills ?? []).map((s) => (
+                    <span
+                      key={s}
+                      className="rounded-lg border border-cyan/30 bg-cyan/5 px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-cyan"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
             )}
+
 
             <div className="mt-4">
               <Field label="NAME" value={name} onChange={setName} />
@@ -167,13 +184,14 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
                 placeholder="e.g. B.Tech CSE"
               />
               <Field label="YEAR" value={year} onChange={setYear} placeholder="e.g. 2nd Year" />
-              <Field
-                label="SKILLS (COMMA SEPARATED)"
-                value={skills}
-                onChange={setSkills}
-                placeholder="Python, Machine Learning, IoT, GIS"
-              />
               <Field label="BIO" value={bio} onChange={setBio} multiline />
+              <div className="border-t border-border py-4">
+                <p className="mono-label text-muted-foreground">EDIT SKILL PROFILE</p>
+                <div className="mt-3">
+                  <SkillPicker value={skills} onChange={setSkills} />
+                </div>
+              </div>
+
             </div>
 
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}

@@ -19,7 +19,17 @@ import {
 
 type Phase = "matching" | "build" | "confirm" | "success";
 
+/** True when a student's own skill label satisfies one of the matched needs. */
+function isMatchingSkill(skill: string, matching: string[]): boolean {
+  const x = skill.trim().toLowerCase();
+  return matching.some((m) => {
+    const y = m.trim().toLowerCase();
+    return x === y || x.includes(y) || y.includes(x);
+  });
+}
+
 function SkillChip({ label, tone = "cyan" }: { label: string; tone?: "cyan" | "violet" }) {
+
   return (
     <span
       className={
@@ -75,6 +85,8 @@ export function TeamFormationModal({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [createdTeamId, setCreatedTeamId] = useState<string | null>(null);
+  const [skillFilter, setSkillFilter] = useState<string | null>(null);
+
 
   const recommended = challenge?.recommended_skills ?? null;
   const hasRecommended = (recommended ?? []).length > 0;
@@ -90,6 +102,8 @@ export function TeamFormationModal({
     setSaveError(null);
     setLoadError(null);
     setCreatedTeamId(null);
+    setSkillFilter(null);
+
 
     void (async () => {
       const started = Date.now();
@@ -125,6 +139,16 @@ export function TeamFormationModal({
     () => teamCoverage(selectedMembers, recommended),
     [selectedMembers, recommended],
   );
+
+  /**
+   * Students shown in the list. With a skill gap filter active, only students
+   * whose own saved skills cover that missing skill are shown.
+   */
+  const visibleStudents = useMemo(() => {
+    if (!skillFilter) return students;
+    return students.filter((s) => isMatchingSkill(skillFilter, s.skills));
+  }, [students, skillFilter]);
+
 
   const toggle = (id: string) => {
     setSaveError(null);
@@ -283,22 +307,38 @@ export function TeamFormationModal({
                 <div className="relative mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
                   {/* Top matches */}
                   <div>
-                    <p className="mono-label text-muted-foreground">TOP MATCHES</p>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="mono-label text-muted-foreground">
+                        {skillFilter ? `STUDENTS WITH ${skillFilter.toUpperCase()}` : "TOP MATCHES"}
+                      </p>
+                      {skillFilter && (
+                        <button
+                          type="button"
+                          onClick={() => setSkillFilter(null)}
+                          className="font-mono text-[9px] tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          CLEAR FILTER
+                        </button>
+                      )}
+                    </div>
                     {loadError && (
                       <p className="mt-3 text-sm text-destructive">{loadError}</p>
                     )}
-                    {!loadError && students.length === 0 && (
+                    {!loadError && visibleStudents.length === 0 && (
                       <div className="glass-soft mt-3 rounded-xl px-5 py-10 text-center">
                         <p className="mono-label text-muted-foreground">
                           NO MATCHING STUDENTS FOUND
                         </p>
                         <p className="mt-3 text-sm text-muted-foreground">
-                          Invite students to complete their CivicX skill profiles.
+                          {skillFilter
+                            ? "No university student has saved this skill yet."
+                            : "Invite students to complete their CivicX skill profiles."}
                         </p>
                       </div>
                     )}
                     <div className="mt-3 space-y-3">
-                      {students.map((s) => {
+                      {visibleStudents.map((s) => {
+
                         const inTeam = selected.includes(s.id);
                         const isSelf = s.id === currentProfile?.id;
                         return (
@@ -332,20 +372,33 @@ export function TeamFormationModal({
 
                             {s.skills.length > 0 ? (
                               <div className="mt-3 flex flex-wrap gap-2">
-                                {s.skills.map((k) => (
-                                  <span
-                                    key={k}
-                                    className="rounded-lg border border-border px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-muted-foreground"
-                                  >
-                                    {k}
-                                  </span>
-                                ))}
+                                {s.skills.map((k) => {
+                                  const hit = isMatchingSkill(k, s.matchingSkills);
+                                  return (
+                                    <span
+                                      key={k}
+                                      className={
+                                        hit
+                                          ? "inline-flex items-center gap-1.5 rounded-lg border border-cyan/40 bg-cyan/10 px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-cyan"
+                                          : "rounded-lg border border-border px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-muted-foreground"
+                                      }
+                                    >
+                                      {k}
+                                      {hit && <Check className="h-3 w-3" />}
+                                    </span>
+                                  );
+                                })}
                               </div>
                             ) : (
                               <p className="mt-3 font-mono text-[10px] tracking-[0.14em] text-violet">
                                 SKILL PROFILE INCOMPLETE
                               </p>
                             )}
+
+                            {s.bio && (
+                              <p className="mt-3 text-xs text-muted-foreground">{s.bio}</p>
+                            )}
+
 
                             {s.matchingSkills.length > 0 && (
                               <div className="mt-3">
@@ -460,14 +513,32 @@ export function TeamFormationModal({
                             <div className="mt-4 rounded-xl border border-warn/30 bg-warn/5 p-3">
                               <p className="mono-label text-warn">SKILL GAP DETECTED</p>
                               <p className="mt-1.5 text-xs text-muted-foreground">
-                                {coverage.missing.join(", ")}{" "}
-                                {coverage.missing.length === 1 ? "expertise is" : "skills are"}{" "}
-                                currently missing.
+                                Your team is missing: {coverage.missing.join(", ")}
                               </p>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {coverage.missing.map((skill) => (
+                                  <button
+                                    key={skill}
+                                    type="button"
+                                    onClick={() =>
+                                      setSkillFilter(skillFilter === skill ? null : skill)
+                                    }
+                                    className={
+                                      skillFilter === skill
+                                        ? "rounded-xl border border-warn/60 bg-warn/15 px-3 py-1.5 font-mono text-[9px] font-semibold tracking-[0.14em] text-warn"
+                                        : "rounded-xl border border-border px-3 py-1.5 font-mono text-[9px] tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+                                    }
+                                  >
+                                    {skillFilter === skill ? "SHOWING · " : "FIND A STUDENT WITH · "}
+                                    {skill.toUpperCase()}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
                           ) : (
                             <p className="mono-label mt-4 text-signal">MISSION READY</p>
                           )}
+
                         </>
                       )}
                     </div>

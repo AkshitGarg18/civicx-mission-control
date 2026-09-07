@@ -96,6 +96,7 @@ export function TeamDetail({
                 name: m.profile?.name ?? null,
                 institution: m.profile?.institution ?? null,
                 course: m.profile?.course ?? null,
+                bio: m.profile?.bio ?? null,
                 year: m.profile?.year ?? null,
                 skills,
               },
