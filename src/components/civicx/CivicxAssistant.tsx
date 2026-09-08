@@ -163,7 +163,7 @@ export function CivicxAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? {} : { opacity: 0, y: 12, scale: 0.94 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="glass fixed bottom-5 right-5 z-50 flex items-center gap-2.5 rounded-2xl border border-cyan/30 px-4 py-3 shadow-[0_0_32px_-8px_hsl(var(--cyan)/0.45)] transition-transform hover:-translate-y-0.5"
+            className="glass fixed bottom-5 right-5 z-[120] flex items-center gap-2.5 rounded-2xl border border-cyan/30 px-4 py-3 shadow-[0_0_32px_-8px_hsl(var(--cyan)/0.45)] transition-transform hover:-translate-y-0.5"
           >
             <span className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-cyan/15">
               <Brain className="h-4 w-4 text-cyan" />
@@ -184,7 +184,7 @@ export function CivicxAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? {} : { opacity: 0, y: 24, scale: 0.97 }}
             transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-            className="glass fixed bottom-4 right-4 z-50 flex h-[min(38rem,calc(100vh-2rem))] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-cyan/25 shadow-[0_0_48px_-12px_hsl(var(--cyan)/0.4)]"
+            className="glass fixed bottom-4 right-4 z-[120] flex h-[min(38rem,calc(100vh-2rem))] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-cyan/25 shadow-[0_0_48px_-12px_hsl(var(--cyan)/0.4)]"
           >
             <header className="flex items-start gap-3 border-b border-border/70 px-4 py-3.5">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet/15">
