@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useServerFn } from "@tanstack/react-start";
 import { Brain, Minus, RotateCcw, Send, Sparkles, X } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/lib/auth-context";
 import { useAssistantContext } from "@/lib/assistant-context";
 import { askCivicxAi } from "@/lib/assistant.functions";
@@ -49,6 +50,15 @@ const clock = (at: number) =>
   new Date(at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
 
 const newId = () => Math.random().toString(36).slice(2);
+
+/** Renders an assistant answer, keeping the model's light markdown readable. */
+function AnswerBody({ text }: { text: string }) {
+  return (
+    <div className="space-y-2 [&_a]:text-cyan [&_a]:underline [&_code]:font-mono [&_code]:text-xs [&_li]:ml-4 [&_li]:list-disc [&_ol>li]:list-decimal [&_strong]:font-semibold [&_strong]:text-foreground">
+      <ReactMarkdown>{text}</ReactMarkdown>
+    </div>
+  );
+}
 
 /**
  * Floating CivicX AI assistant. Every answer comes from the server-side model
@@ -230,10 +240,10 @@ export function CivicxAssistant() {
                     className={
                       m.role === "user"
                         ? "max-w-[85%] rounded-xl rounded-br-sm border border-cyan/25 bg-cyan/10 px-3 py-2 text-sm leading-relaxed"
-                        : "glass-soft max-w-[92%] rounded-xl rounded-tl-sm px-3 py-2 text-sm leading-relaxed whitespace-pre-line"
+                        : "glass-soft max-w-[92%] rounded-xl rounded-tl-sm px-3 py-2 text-sm leading-relaxed"
                     }
                   >
-                    {m.content}
+                    {m.role === "assistant" ? <AnswerBody text={m.content} /> : m.content}
                     <p className="mono-label mt-1.5 text-muted-foreground/70">{clock(m.at)}</p>
                   </div>
                 </div>
