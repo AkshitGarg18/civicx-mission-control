@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useServerFn } from "@tanstack/react-start";
 import { Brain, Minus, RotateCcw, Send, Sparkles, X } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/lib/auth-context";
 import { useAssistantContext } from "@/lib/assistant-context";
 import { askCivicxAi } from "@/lib/assistant.functions";
@@ -49,6 +50,15 @@ const clock = (at: number) =>
   new Date(at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
 
 const newId = () => Math.random().toString(36).slice(2);
+
+/** Renders an assistant answer, keeping the model's light markdown readable. */
+function AnswerBody({ text }: { text: string }) {
+  return (
+    <div className="space-y-2 [&_a]:text-cyan [&_a]:underline [&_code]:font-mono [&_code]:text-xs [&_li]:ml-4 [&_li]:list-disc [&_ol>li]:list-decimal [&_strong]:font-semibold [&_strong]:text-foreground">
+      <ReactMarkdown>{text}</ReactMarkdown>
+    </div>
+  );
+}
 
 /**
  * Floating CivicX AI assistant. Every answer comes from the server-side model
@@ -153,7 +163,7 @@ export function CivicxAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? {} : { opacity: 0, y: 12, scale: 0.94 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="glass fixed bottom-5 right-5 z-50 flex items-center gap-2.5 rounded-2xl border border-cyan/30 px-4 py-3 shadow-[0_0_32px_-8px_hsl(var(--cyan)/0.45)] transition-transform hover:-translate-y-0.5"
+            className="glass fixed bottom-5 right-5 z-[120] flex items-center gap-2.5 rounded-2xl border border-cyan/30 px-4 py-3 shadow-[0_0_32px_-8px_hsl(var(--cyan)/0.45)] transition-transform hover:-translate-y-0.5"
           >
             <span className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-cyan/15">
               <Brain className="h-4 w-4 text-cyan" />
@@ -174,7 +184,7 @@ export function CivicxAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? {} : { opacity: 0, y: 24, scale: 0.97 }}
             transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-            className="glass fixed bottom-4 right-4 z-50 flex h-[min(38rem,calc(100vh-2rem))] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-cyan/25 shadow-[0_0_48px_-12px_hsl(var(--cyan)/0.4)]"
+            className="glass fixed bottom-4 right-4 z-[120] flex h-[min(38rem,calc(100vh-2rem))] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-cyan/25 shadow-[0_0_48px_-12px_hsl(var(--cyan)/0.4)]"
           >
             <header className="flex items-start gap-3 border-b border-border/70 px-4 py-3.5">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet/15">
@@ -230,10 +240,10 @@ export function CivicxAssistant() {
                     className={
                       m.role === "user"
                         ? "max-w-[85%] rounded-xl rounded-br-sm border border-cyan/25 bg-cyan/10 px-3 py-2 text-sm leading-relaxed"
-                        : "glass-soft max-w-[92%] rounded-xl rounded-tl-sm px-3 py-2 text-sm leading-relaxed whitespace-pre-line"
+                        : "glass-soft max-w-[92%] rounded-xl rounded-tl-sm px-3 py-2 text-sm leading-relaxed"
                     }
                   >
-                    {m.content}
+                    {m.role === "assistant" ? <AnswerBody text={m.content} /> : m.content}
                     <p className="mono-label mt-1.5 text-muted-foreground/70">{clock(m.at)}</p>
                   </div>
                 </div>

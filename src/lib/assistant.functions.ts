@@ -64,7 +64,7 @@ HOW TO ANSWER
 - If CivicX context cannot answer the question, say exactly: "I don't have enough information to answer that accurately." Then, if useful, give a short general explanation.
 - General civic or technical questions (sensors, technologies, approaches) are welcome, but label them clearly as general suggestions, e.g. start with "General suggestion (not CivicX data):". Never present them as official government guidance or verified fact.
 - Never invent CivicX features, buttons, pages or statuses that are not in the knowledge above.
-- Plain text only, no markdown headings or tables. Short paragraphs or dashes are fine.`;
+- Keep formatting light: short paragraphs, dashed lists, occasional bold. No headings or tables.`;
 }
 
 function clean(value: unknown): string {
