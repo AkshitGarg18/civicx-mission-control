@@ -4,6 +4,7 @@ import { contributionArea, scoreStudent, teamCoverage, type TeamWithMembers } fr
 import type { ChallengeRow } from "@/lib/challenges-service";
 import { proposalStatusMeta, type ProposalStatus } from "@/lib/proposal-data";
 import { IndustrySignals } from "./IndustrySignals";
+import { useAssistantFocus } from "@/lib/assistant-context";
 
 /** Team Command Center for one stored team. */
 export function TeamDetail({
@@ -19,6 +20,9 @@ export function TeamDetail({
   onBack: () => void;
   onOpenProposal: () => void;
 }) {
+  // Lets CivicX AI discuss the team and mission the operator is viewing.
+  useAssistantFocus({ teamId: entry.team.id, missionId: mission?.id ?? null });
+
   const recommended = mission?.recommended_skills ?? null;
   const members = entry.members.map((m) => ({
     ...m,

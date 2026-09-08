@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthProvider } from "@/lib/auth-context";
+import { AssistantProvider } from "@/lib/assistant-context";
+import { CivicxAssistant } from "@/components/civicx/CivicxAssistant";
 
 /**
  * Auth gate for every console route. Runs client-side only because the session
@@ -17,7 +19,10 @@ export const Route = createFileRoute("/_authenticated")({
   },
   component: () => (
     <AuthProvider>
-      <Outlet />
+      <AssistantProvider>
+        <Outlet />
+        <CivicxAssistant />
+      </AssistantProvider>
     </AuthProvider>
   ),
 });
