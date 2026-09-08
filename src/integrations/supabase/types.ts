@@ -90,15 +90,21 @@ export type Database = {
           created_at: string
           created_by: string
           description: string
+          emergency_status: string
+          escalated_at: string | null
           estimated_impact: number | null
           id: string
           latitude: number | null
           location_name: string | null
           longitude: number | null
           priority: string
+          recommended_service: string | null
           recommended_skills: string[] | null
           solution_directions: string[] | null
           status: string
+          threat_category: string | null
+          threat_level: string
+          threat_reason: string | null
           title: string
           updated_at: string
         }
@@ -110,15 +116,21 @@ export type Database = {
           created_at?: string
           created_by: string
           description: string
+          emergency_status?: string
+          escalated_at?: string | null
           estimated_impact?: number | null
           id?: string
           latitude?: number | null
           location_name?: string | null
           longitude?: number | null
           priority?: string
+          recommended_service?: string | null
           recommended_skills?: string[] | null
           solution_directions?: string[] | null
           status?: string
+          threat_category?: string | null
+          threat_level?: string
+          threat_reason?: string | null
           title: string
           updated_at?: string
         }
@@ -130,15 +142,21 @@ export type Database = {
           created_at?: string
           created_by?: string
           description?: string
+          emergency_status?: string
+          escalated_at?: string | null
           estimated_impact?: number | null
           id?: string
           latitude?: number | null
           location_name?: string | null
           longitude?: number | null
           priority?: string
+          recommended_service?: string | null
           recommended_skills?: string[] | null
           solution_directions?: string[] | null
           status?: string
+          threat_category?: string | null
+          threat_level?: string
+          threat_reason?: string | null
           title?: string
           updated_at?: string
         }

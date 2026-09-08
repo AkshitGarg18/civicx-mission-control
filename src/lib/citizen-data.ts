@@ -316,7 +316,10 @@ export interface AiAnalysisResult {
   stakeholders?: string[];
   directions?: string[];
   missionCode: string;
+  /** Advisory emergency assessment, when the analysis produced one. */
+  threat?: import("@/lib/emergency-service").ThreatAssessment;
 }
+
 
 /**
  * Demo AI output. Replace this with a Gemini response later — the shape is the

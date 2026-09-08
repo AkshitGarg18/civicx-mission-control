@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Menu, X } from "lucide-react";
+import { ArrowLeft, Menu, ShieldAlert, X } from "lucide-react";
 import { citizenNav } from "@/lib/citizen-data";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { cn } from "@/lib/utils";
@@ -70,7 +70,16 @@ function SidebarFooter({ onNavigate }: { onNavigate?: ((id: string) => void) | u
         </p>
       </div>
 
+      <Link
+        to="/emergency"
+        className="flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-2.5 font-mono text-[10px] font-semibold tracking-[0.16em] text-destructive transition-colors hover:bg-destructive/20"
+      >
+        <ShieldAlert className="h-3.5 w-3.5" />
+        EMERGENCY CENTER
+      </Link>
+
       <UserMenu onNavigateSection={onNavigate} />
+
 
       <Link
         to="/access"

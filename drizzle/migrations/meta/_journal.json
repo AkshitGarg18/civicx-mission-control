@@ -57,6 +57,13 @@
       "when": 1788687586508,
       "tag": "0007_government_oversight_access",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788886345133,
+      "tag": "0008_add_emergency_threat_analysis",
+      "breakpoints": true
     }
   ]
 }

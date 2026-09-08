@@ -707,7 +707,9 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                     {...(analysis ? { result: analysis } : {})}
                     {...(analysisError ? { error: analysisError } : {})}
                     {...(challengeId ? { onRetry: () => void analyse(challengeId) } : {})}
+                    challengeId={challengeId}
                     onCreateMission={finish}
+
                   />
 
                 </div>

@@ -15,6 +15,7 @@ import { Route as AccessRouteImport } from './routes/access'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthenticatedCitizenRouteImport } from './routes/_authenticated/citizen'
+import { Route as AuthenticatedEmergencyRouteImport } from './routes/_authenticated/emergency'
 import { Route as AuthenticatedGovernmentRouteImport } from './routes/_authenticated/government'
 import { Route as AuthenticatedIndustryRouteImport } from './routes/_authenticated/industry'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
@@ -50,6 +51,11 @@ const AuthenticatedCitizenRoute = AuthenticatedCitizenRouteImport.update({
   path: '/citizen',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEmergencyRoute = AuthenticatedEmergencyRouteImport.update({
+  id: '/emergency',
+  path: '/emergency',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedGovernmentRoute = AuthenticatedGovernmentRouteImport.update({
   id: '/government',
   path: '/government',
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/citizen': typeof AuthenticatedCitizenRoute
+  '/emergency': typeof AuthenticatedEmergencyRoute
   '/government': typeof AuthenticatedGovernmentRoute
   '/industry': typeof AuthenticatedIndustryRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/citizen': typeof AuthenticatedCitizenRoute
+  '/emergency': typeof AuthenticatedEmergencyRoute
   '/government': typeof AuthenticatedGovernmentRoute
   '/industry': typeof AuthenticatedIndustryRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/_authenticated/citizen': typeof AuthenticatedCitizenRoute
+  '/_authenticated/emergency': typeof AuthenticatedEmergencyRoute
   '/_authenticated/government': typeof AuthenticatedGovernmentRoute
   '/_authenticated/industry': typeof AuthenticatedIndustryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/citizen'
+    | '/emergency'
     | '/government'
     | '/industry'
     | '/profile'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/citizen'
+    | '/emergency'
     | '/government'
     | '/industry'
     | '/profile'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/_authenticated/citizen'
+    | '/_authenticated/emergency'
     | '/_authenticated/government'
     | '/_authenticated/industry'
     | '/_authenticated/profile'
@@ -206,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCitizenRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/emergency': {
+      id: '/_authenticated/emergency'
+      path: '/emergency'
+      fullPath: '/emergency'
+      preLoaderRoute: typeof AuthenticatedEmergencyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/government': {
       id: '/_authenticated/government'
       path: '/government'
@@ -246,6 +265,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCitizenRoute: typeof AuthenticatedCitizenRoute
+  AuthenticatedEmergencyRoute: typeof AuthenticatedEmergencyRoute
   AuthenticatedGovernmentRoute: typeof AuthenticatedGovernmentRoute
   AuthenticatedIndustryRoute: typeof AuthenticatedIndustryRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
@@ -255,6 +275,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCitizenRoute: AuthenticatedCitizenRoute,
+  AuthenticatedEmergencyRoute: AuthenticatedEmergencyRoute,
   AuthenticatedGovernmentRoute: AuthenticatedGovernmentRoute,
   AuthenticatedIndustryRoute: AuthenticatedIndustryRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
