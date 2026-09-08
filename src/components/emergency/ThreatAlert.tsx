@@ -132,7 +132,7 @@ export function ThreatAlert({
           </span>
           <div className="min-w-0">
             <p className="font-mono text-[11px] font-semibold tracking-[0.2em] text-destructive">
-              🚨 POTENTIAL EMERGENCY DETECTED
+              POTENTIAL EMERGENCY DETECTED
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Not a confirmed emergency. A human authority has not validated this report.
@@ -142,7 +142,7 @@ export function ThreatAlert({
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <Field label="THREAT">
-            {meta ? `${meta.emoji} ${meta.label}` : (threat.category ?? "Unclassified")}
+            {meta ? meta.label : (threat.category ?? "Unclassified")}
           </Field>
           <Field label="SEVERITY">
             <span

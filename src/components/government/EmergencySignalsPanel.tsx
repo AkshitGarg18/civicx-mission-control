@@ -100,7 +100,7 @@ export function EmergencySignalsPanel({
                     </span>
                     {meta && (
                       <span className="font-mono text-[10px] tracking-[0.14em] text-muted-foreground">
-                        {meta.emoji} {meta.label.toUpperCase()}
+                        {meta.label.toUpperCase()}
                       </span>
                     )}
                   </div>
