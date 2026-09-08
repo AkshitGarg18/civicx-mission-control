@@ -15,6 +15,37 @@ const MODEL = "google/gemini-2.5-flash";
 const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"] as const;
 type Priority = (typeof PRIORITIES)[number];
 
+const THREAT_LEVELS = ["NORMAL", "LOW", "MEDIUM", "HIGH", "CRITICAL"] as const;
+type ThreatLevel = (typeof THREAT_LEVELS)[number];
+
+const SERVICES = [
+  "PRIMARY",
+  "POLICE",
+  "FIRE",
+  "AMBULANCE",
+  "DISASTER_MANAGEMENT",
+  "ROAD_ACCIDENT",
+  "LPG_LEAK",
+  "CYBER_CRIME",
+  "WOMEN_HELPLINE",
+  "CHILD_HELPLINE",
+  "NONE",
+] as const;
+
+const EMERGENCY_CATEGORIES = [
+  "FIRE",
+  "MEDICAL",
+  "ACCIDENT",
+  "GAS_LEAK",
+  "FLOOD",
+  "INFRASTRUCTURE_FAILURE",
+  "ELECTRICAL",
+  "HAZMAT",
+  "PUBLIC_SAFETY",
+  "NATURAL_DISASTER",
+  "CIVIC_ISSUE",
+] as const;
+
 export interface ChallengeAiAnalysis {
   category: string;
   priority: Priority;
@@ -24,7 +55,17 @@ export interface ChallengeAiAnalysis {
   recommendedSkills: string[];
   affectedStakeholders: string[];
   solutionDirections: string[];
+  /** Advisory threat assessment — never a confirmed emergency. */
+  threatLevel: ThreatLevel;
+  threatCategory: string;
+  threatReason: string;
+  recommendedService: string;
+  emergencyStatus: string;
+  reportedLocation: string | null;
+  latitude: number | null;
+  longitude: number | null;
 }
+
 
 /** Message shown to the citizen when analysis could not be completed. */
 export class AnalysisUnavailableError extends Error {
@@ -69,6 +110,32 @@ function parseAnalysis(raw: string): ChallengeAiAnalysis {
   const affectedStakeholders = stringList(parsed["affected_stakeholders"], 8);
   const solutionDirections = stringList(parsed["solution_directions"], 8);
 
+  const threatLevelRaw = String(parsed["threat_level"] ?? "NORMAL").toUpperCase();
+  const threatLevel = (THREAT_LEVELS as readonly string[]).includes(threatLevelRaw)
+    ? (threatLevelRaw as ThreatLevel)
+    : "NORMAL";
+
+  const threatCategoryRaw = String(parsed["threat_category"] ?? "CIVIC_ISSUE").toUpperCase();
+  const threatCategory = (EMERGENCY_CATEGORIES as readonly string[]).includes(threatCategoryRaw)
+    ? threatCategoryRaw
+    : "CIVIC_ISSUE";
+
+  const serviceRaw = String(parsed["recommended_service"] ?? "NONE").toUpperCase();
+  const recommendedService = (SERVICES as readonly string[]).includes(serviceRaw)
+    ? serviceRaw
+    : "NONE";
+
+  const threatReason =
+    typeof parsed["threat_reason"] === "string" ? parsed["threat_reason"].trim() : "";
+
+  // Advisory only: a person still has to confirm before any call is placed.
+  const emergencyStatus =
+    threatLevel === "CRITICAL"
+      ? "POTENTIAL_EMERGENCY"
+      : threatLevel === "HIGH"
+        ? "HIGH_PRIORITY"
+        : "NORMAL";
+
   if (!category) throw new Error("missing category");
   if (!PRIORITIES.includes(priority)) throw new Error(`invalid priority: ${priority}`);
   if (!Number.isFinite(confidence) || confidence < 0 || confidence > 1)
@@ -85,6 +152,14 @@ function parseAnalysis(raw: string): ChallengeAiAnalysis {
     recommendedSkills,
     affectedStakeholders,
     solutionDirections,
+    threatLevel,
+    threatCategory,
+    threatReason,
+    recommendedService,
+    emergencyStatus,
+    reportedLocation: null,
+    latitude: null,
+    longitude: null,
   };
 }
 
@@ -98,13 +173,24 @@ Analyse the report and respond with ONLY a JSON object, no prose and no code fen
   "summary": "2-3 sentence explanation of the civic challenge",
   "recommended_skills": ["string", ...],
   "affected_stakeholders": ["string", ...],
-  "solution_directions": ["string", ...]
+  "solution_directions": ["string", ...],
+  "threat_level": "NORMAL" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+  "threat_category": "FIRE" | "MEDICAL" | "ACCIDENT" | "GAS_LEAK" | "FLOOD" | "INFRASTRUCTURE_FAILURE" | "ELECTRICAL" | "HAZMAT" | "PUBLIC_SAFETY" | "NATURAL_DISASTER" | "CIVIC_ISSUE",
+  "threat_reason": "one or two sentences explaining the threat judgement, with explicit uncertainty when the report is vague",
+  "recommended_service": "PRIMARY" | "POLICE" | "FIRE" | "AMBULANCE" | "DISASTER_MANAGEMENT" | "ROAD_ACCIDENT" | "LPG_LEAK" | "CYBER_CRIME" | "WOMEN_HELPLINE" | "CHILD_HELPLINE" | "NONE"
 }
 Rules:
 - Never invent precise real-world statistics. "estimated_impact" is a rough AI estimate of the total number of PEOPLE affected (a whole head-count, never a score or rating); if the report does not support any estimate, use null.
 - Word the summary so it is clear the assessment is an AI estimate, not verified fact.
 - Base everything strictly on the citizen's report; do not claim to have detected duplicate reports or consulted external data.
-- Give 3-5 recommended skills, 2-4 affected stakeholders and 2-4 solution directions.`;
+- Give 3-5 recommended skills, 2-4 affected stakeholders and 2-4 solution directions.
+Threat assessment rules (safety critical):
+- You are advisory only. NEVER state that an emergency is confirmed, that authorities were contacted, or that help is on the way. Use wording such as "possible" or "potential".
+- Use "threat_level": "CRITICAL" only when the report describes an active, immediate danger to human life or property right now (active fire, people trapped, serious injuries, gas leak, collapse, live electrical hazard, severe flooding, hazardous material release, immediate violence).
+- Ordinary civic issues (potholes, garbage, broken streetlights, minor waterlogging, long-standing neglect) are NEVER emergencies: use "threat_level": "NORMAL" or "LOW", "threat_category": "CIVIC_ISSUE" and "recommended_service": "NONE".
+- When the report is vague or ambiguous (for example an unidentified smell), do not claim an emergency: use at most "MEDIUM" or "HIGH", say plainly in "threat_reason" that the report is unverified and inconclusive, and recommend a cautious service only if a real hazard is plausible.
+- "recommended_service" must be "PRIMARY" (112) whenever multiple services or immediate life safety are involved.`;
+
 
 async function callModel(prompt: string): Promise<string> {
   const apiKey = process.env["LOVABLE_API_KEY"];
@@ -211,6 +297,8 @@ export const analyzeChallenge = createServerFn({ method: "POST" })
       throw new AnalysisUnavailableError();
     }
 
+    // Escalation status stays advisory: only a person confirming the call
+    // action can move a report to EMERGENCY_ESCALATION_INITIATED.
     const { error: updateError } = await supabase
       .from("challenges")
       .update({
@@ -222,6 +310,11 @@ export const analyzeChallenge = createServerFn({ method: "POST" })
         recommended_skills: analysis.recommendedSkills,
         affected_stakeholders: analysis.affectedStakeholders,
         solution_directions: analysis.solutionDirections,
+        threat_level: analysis.threatLevel,
+        threat_category: analysis.threatCategory,
+        threat_reason: analysis.threatReason,
+        recommended_service: analysis.recommendedService,
+        emergency_status: analysis.emergencyStatus,
         status: "AI_ANALYSIS_COMPLETE",
       })
       .eq("id", challenge.id);
@@ -237,5 +330,20 @@ export const analyzeChallenge = createServerFn({ method: "POST" })
       message: "AI analysis completed successfully",
     });
 
-    return analysis;
+    if (analysis.emergencyStatus === "POTENTIAL_EMERGENCY") {
+      await supabase.from("challenge_status_history").insert({
+        challenge_id: challenge.id,
+        status: "POTENTIAL_EMERGENCY",
+        message:
+          "AI threat analysis flagged a potential emergency. Advisory only — no authority has been contacted.",
+      });
+    }
+
+    return {
+      ...analysis,
+      reportedLocation: challenge.location_name,
+      latitude: challenge.latitude,
+      longitude: challenge.longitude,
+    };
   });
+

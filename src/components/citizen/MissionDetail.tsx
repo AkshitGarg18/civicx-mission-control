@@ -12,6 +12,10 @@ import {
   type ChallengeRow,
   type EvidenceRow,
 } from "@/lib/challenges-service";
+import { readThreat } from "@/lib/emergency-service";
+import { ThreatAlert } from "@/components/emergency/ThreatAlert";
+import { useAuth } from "@/lib/auth-context";
+
 
 /** Read-only detail view for a stored challenge. */
 export function MissionDetail({
@@ -22,6 +26,8 @@ export function MissionDetail({
   onClose: () => void;
 }) {
   const reduced = useReducedMotion();
+  const { currentProfile } = useAuth();
+
   const [row, setRow] = useState<ChallengeRow | null>(null);
   const [evidence, setEvidence] = useState<EvidenceRow[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -144,6 +150,13 @@ export function MissionDetail({
                       <p className="text-sm leading-relaxed text-foreground/85">{row.ai_summary}</p>
                     </Block>
                   )}
+
+                  <ThreatAlert
+                    threat={readThreat(row)}
+                    challengeId={row.id}
+                    canEscalate={row.created_by === currentProfile?.id}
+                  />
+
 
                   {row.recommended_skills && row.recommended_skills.length > 0 && (
                     <Block label="RECOMMENDED SKILLS">

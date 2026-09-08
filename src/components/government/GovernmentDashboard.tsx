@@ -22,10 +22,19 @@ import { LiveMapPanel } from "./LiveMapPanel";
 import { TeamsSolutionsPanel } from "./TeamsSolutionsPanel";
 import { IndustryCollaborationPanel } from "./IndustryCollaborationPanel";
 import { AnalyticsPanel } from "./AnalyticsPanel";
+import { EmergencySignalsPanel } from "./EmergencySignalsPanel";
 import { OrganizationProfilePanel } from "./OrganizationProfilePanel";
 
 /** Sections where the oversight filters apply. */
-const filterable = new Set(["command-center", "missions", "map", "teams", "industry", "analytics"]);
+const filterable = new Set([
+  "command-center",
+  "missions",
+  "map",
+  "emergency",
+  "teams",
+  "industry",
+  "analytics",
+]);
 
 /**
  * Government console. Read-only oversight of the whole civic pipeline: every
@@ -126,6 +135,10 @@ export function GovernmentDashboard() {
 
           {active === "map" && (
             <LiveMapPanel missions={filtered} reduced={reduced} onOpenMission={openControl} />
+          )}
+
+          {active === "emergency" && (
+            <EmergencySignalsPanel missions={filtered} loaded={loaded} onOpen={openControl} />
           )}
 
           {active === "teams" && (

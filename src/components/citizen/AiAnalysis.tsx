@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Check, Loader2, RotateCcw, Sparkles, TriangleAlert } from "lucide-react";
 import { analysisSteps, type AiAnalysisResult } from "@/lib/citizen-data";
 import { PriorityChip } from "@/components/civicx/StatusChip";
+import { ThreatAlert } from "@/components/emergency/ThreatAlert";
 
 /**
  * Cinematic AI analysis screen.
@@ -16,14 +17,17 @@ export function AiAnalysis({
   error,
   onRetry,
   onCreateMission,
+  challengeId = null,
 }: {
   result?: AiAnalysisResult | null;
   error?: string | null;
   onRetry?: () => void;
   onCreateMission: () => void;
+  challengeId?: string | null;
 }) {
   const reduced = useReducedMotion();
   const [done, setDone] = useState(reduced ? analysisSteps.length : 0);
+
 
   useEffect(() => {
     if (reduced) return;
@@ -189,6 +193,11 @@ export function AiAnalysis({
               <p className="mono-label text-muted-foreground">AI SUMMARY</p>
               <p className="mt-2 text-sm leading-relaxed text-foreground/85">{result.summary}</p>
             </div>
+
+            {result.threat && (
+              <ThreatAlert threat={result.threat} challengeId={challengeId} canEscalate />
+            )}
+
 
             <motion.button
               type="button"
