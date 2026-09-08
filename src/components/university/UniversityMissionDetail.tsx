@@ -7,6 +7,7 @@ import { statusMap, type ChallengeRow } from "@/lib/challenges-service";
 import { getChallengeById } from "@/lib/challenges-service";
 import { categoryLabel } from "@/lib/university-data";
 import { TeamFormationModal } from "./TeamFormationModal";
+import { useAssistantFocus } from "@/lib/assistant-context";
 
 /** The same MapLibre map the citizen dashboard uses. */
 const ChallengeMap = lazy(() => import("@/components/citizen/ChallengeMap"));
@@ -57,6 +58,9 @@ export function UniversityMissionDetail({
   }, [challengeId]);
 
   const status = row ? (statusMap[row.status] ?? "SIGNAL DETECTED") : null;
+  // Lets CivicX AI answer "explain this mission" about what is on screen.
+  useAssistantFocus({ missionId: challengeId, label: row?.title ?? null });
+
   const hasPoint =
     !!row &&
     typeof row.latitude === "number" &&
