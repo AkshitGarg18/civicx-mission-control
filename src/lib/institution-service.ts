@@ -107,3 +107,18 @@ export function parseList(raw: string): string[] {
   }
   return out;
 }
+
+/** The signed-in account's own institution capability row. */
+export async function getMyInstitution(userId: string): Promise<InstitutionProfile | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(INSTITUTION_COLUMNS)
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[civicx] own institution read failed", error);
+    return null;
+  }
+  return data ? toInstitutionProfile(data as InstitutionRow) : null;
+}
