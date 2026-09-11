@@ -83,10 +83,13 @@ export type Database = {
       }
       challenges: {
         Row: {
+          address: string | null
           affected_stakeholders: string[] | null
           ai_confidence: number | null
           ai_summary: string | null
           category: string | null
+          city: string | null
+          country: string | null
           created_at: string
           created_by: string
           description: string
@@ -95,12 +98,14 @@ export type Database = {
           estimated_impact: number | null
           id: string
           latitude: number | null
+          locality: string | null
           location_name: string | null
           longitude: number | null
           priority: string
           recommended_service: string | null
           recommended_skills: string[] | null
           solution_directions: string[] | null
+          state: string | null
           status: string
           threat_category: string | null
           threat_level: string
@@ -109,10 +114,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
           affected_stakeholders?: string[] | null
           ai_confidence?: number | null
           ai_summary?: string | null
           category?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           created_by: string
           description: string
@@ -121,12 +129,14 @@ export type Database = {
           estimated_impact?: number | null
           id?: string
           latitude?: number | null
+          locality?: string | null
           location_name?: string | null
           longitude?: number | null
           priority?: string
           recommended_service?: string | null
           recommended_skills?: string[] | null
           solution_directions?: string[] | null
+          state?: string | null
           status?: string
           threat_category?: string | null
           threat_level?: string
@@ -135,10 +145,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
           affected_stakeholders?: string[] | null
           ai_confidence?: number | null
           ai_summary?: string | null
           category?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           created_by?: string
           description?: string
@@ -147,12 +160,14 @@ export type Database = {
           estimated_impact?: number | null
           id?: string
           latitude?: number | null
+          locality?: string | null
           location_name?: string | null
           longitude?: number | null
           priority?: string
           recommended_service?: string | null
           recommended_skills?: string[] | null
           solution_directions?: string[] | null
+          state?: string | null
           status?: string
           threat_category?: string | null
           threat_level?: string
