@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenge_duplicates: {
+        Row: {
+          ai_classification: string
+          ai_confidence: number | null
+          ai_reason: string | null
+          ai_recommended_action: string | null
+          challenge_id: string
+          created_at: string
+          distance_m: number | null
+          id: string
+          possible_duplicate_id: string
+          similarity_score: number
+          status: string
+        }
+        Insert: {
+          ai_classification?: string
+          ai_confidence?: number | null
+          ai_reason?: string | null
+          ai_recommended_action?: string | null
+          challenge_id: string
+          created_at?: string
+          distance_m?: number | null
+          id?: string
+          possible_duplicate_id: string
+          similarity_score?: number
+          status?: string
+        }
+        Update: {
+          ai_classification?: string
+          ai_confidence?: number | null
+          ai_reason?: string | null
+          ai_recommended_action?: string | null
+          challenge_id?: string
+          created_at?: string
+          distance_m?: number | null
+          id?: string
+          possible_duplicate_id?: string
+          similarity_score?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_duplicates_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_duplicates_possible_duplicate_id_fkey"
+            columns: ["possible_duplicate_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenge_evidence: {
         Row: {
           challenge_id: string
@@ -87,6 +144,7 @@ export type Database = {
           affected_stakeholders: string[] | null
           ai_confidence: number | null
           ai_summary: string | null
+          canonical_challenge_id: string | null
           category: string | null
           city: string | null
           country: string | null
@@ -104,6 +162,7 @@ export type Database = {
           priority: string
           recommended_service: string | null
           recommended_skills: string[] | null
+          report_count: number
           solution_directions: string[] | null
           state: string | null
           status: string
@@ -118,6 +177,7 @@ export type Database = {
           affected_stakeholders?: string[] | null
           ai_confidence?: number | null
           ai_summary?: string | null
+          canonical_challenge_id?: string | null
           category?: string | null
           city?: string | null
           country?: string | null
@@ -135,6 +195,7 @@ export type Database = {
           priority?: string
           recommended_service?: string | null
           recommended_skills?: string[] | null
+          report_count?: number
           solution_directions?: string[] | null
           state?: string | null
           status?: string
@@ -149,6 +210,7 @@ export type Database = {
           affected_stakeholders?: string[] | null
           ai_confidence?: number | null
           ai_summary?: string | null
+          canonical_challenge_id?: string | null
           category?: string | null
           city?: string | null
           country?: string | null
@@ -166,6 +228,7 @@ export type Database = {
           priority?: string
           recommended_service?: string | null
           recommended_skills?: string[] | null
+          report_count?: number
           solution_directions?: string[] | null
           state?: string | null
           status?: string
@@ -176,6 +239,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "challenges_canonical_challenge_id_fkey"
+            columns: ["canonical_challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "challenges_created_by_fkey"
             columns: ["created_by"]
@@ -547,6 +617,44 @@ export type Database = {
         Args: { _challenge_id: string }
         Returns: boolean
       }
+      find_duplicate_candidates: {
+        Args: { _challenge_id: string; _limit?: number; _radius_m?: number }
+        Returns: {
+          ai_summary: string
+          category: string
+          city: string
+          created_at: string
+          description: string
+          distance_m: number
+          id: string
+          latitude: number
+          locality: string
+          location_name: string
+          longitude: number
+          priority: string
+          report_count: number
+          status: string
+          title: string
+        }[]
+      }
+      get_canonical_challenge: {
+        Args: { _challenge_id: string }
+        Returns: {
+          ai_summary: string
+          category: string
+          city: string
+          created_at: string
+          id: string
+          latitude: number
+          location_name: string
+          longitude: number
+          priority: string
+          recommended_skills: string[]
+          report_count: number
+          status: string
+          title: string
+        }[]
+      }
       has_civic_role: {
         Args: { _role: string; _user_id: string }
         Returns: boolean
@@ -566,6 +674,10 @@ export type Database = {
       is_team_owner: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
+      }
+      set_duplicate_link: {
+        Args: { _duplicate_id: string; _linked: boolean }
+        Returns: undefined
       }
       team_has_industry_ready_proposal: {
         Args: { _team_id: string }

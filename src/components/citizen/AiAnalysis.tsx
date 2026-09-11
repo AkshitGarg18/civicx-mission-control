@@ -4,6 +4,8 @@ import { ArrowRight, Check, Loader2, RotateCcw, Sparkles, TriangleAlert } from "
 import { analysisSteps, type AiAnalysisResult } from "@/lib/citizen-data";
 import { PriorityChip } from "@/components/civicx/StatusChip";
 import { ThreatAlert } from "@/components/emergency/ThreatAlert";
+import { DuplicateAlert } from "@/components/citizen/DuplicateAlert";
+import type { DuplicateMatch } from "@/lib/duplicates.functions";
 
 /**
  * Cinematic AI analysis screen.
@@ -18,12 +20,14 @@ export function AiAnalysis({
   onRetry,
   onCreateMission,
   challengeId = null,
+  duplicates = [],
 }: {
   result?: AiAnalysisResult | null;
   error?: string | null;
   onRetry?: () => void;
   onCreateMission: () => void;
   challengeId?: string | null;
+  duplicates?: DuplicateMatch[];
 }) {
   const reduced = useReducedMotion();
   const [done, setDone] = useState(reduced ? analysisSteps.length : 0);
@@ -197,6 +201,8 @@ export function AiAnalysis({
             {result.threat && (
               <ThreatAlert threat={result.threat} challengeId={challengeId} canEscalate />
             )}
+
+            {duplicates.length > 0 && <DuplicateAlert matches={duplicates} />}
 
 
             <motion.button

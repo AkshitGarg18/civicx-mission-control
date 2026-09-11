@@ -71,6 +71,13 @@
       "when": 1789147258813,
       "tag": "0009_add_challenge_location_details",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789148847486,
+      "tag": "0010_add_challenge_duplicate_detection",
+      "breakpoints": true
     }
   ]
 }
