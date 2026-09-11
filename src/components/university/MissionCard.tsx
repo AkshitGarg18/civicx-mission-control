@@ -18,9 +18,15 @@ const formatDate = (iso: string) =>
 export function MissionCard({
   row,
   onView,
+  institutionMatch = null,
+  teamCoverage = null,
 }: {
   row: ChallengeRow;
   onView: (id: string) => void;
+  /** Own institution capability match, 0-100, or null when not computable. */
+  institutionMatch?: number | null;
+  /** Skill coverage of the team already formed for this mission, if any. */
+  teamCoverage?: number | null;
 }) {
   const reduced = useReducedMotion();
   const { currentProfile } = useAuth();
@@ -80,6 +86,24 @@ export function MissionCard({
           {row.location_name ?? "Location pending"}
         </span>
       </p>
+
+      <div className="relative mt-3 flex flex-wrap gap-2">
+        {institutionMatch !== null && (
+          <span className="rounded-md border border-azure/40 bg-azure/10 px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] text-azure">
+            INSTITUTION MATCH: {institutionMatch}%
+          </span>
+        )}
+        {skills.length > 0 && (
+          <span className="rounded-md border border-cyan/30 bg-cyan/5 px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] text-cyan">
+            RECOMMENDED SKILLS: {skills.length}
+          </span>
+        )}
+        {teamCoverage !== null && (
+          <span className="rounded-md border border-signal/40 bg-signal/10 px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] text-signal">
+            TEAM COVERAGE: {teamCoverage}%
+          </span>
+        )}
+      </div>
 
       <div className="glass-soft relative mt-4 rounded-xl p-3.5">
         <p className="mono-label text-muted-foreground">AI SUMMARY</p>
