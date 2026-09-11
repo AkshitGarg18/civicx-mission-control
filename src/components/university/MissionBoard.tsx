@@ -11,6 +11,12 @@ import {
   statusFilters,
   type SortId,
 } from "@/lib/university-data";
+import {
+  baselineRequirements,
+  hasInstitutionData,
+  scoreInstitution,
+  type InstitutionProfile,
+} from "@/lib/institution-matching";
 import { MissionCard } from "./MissionCard";
 import { cn } from "@/lib/utils";
 
@@ -44,10 +50,15 @@ export function MissionBoard({
   rows,
   loaded,
   onView,
+  institution = null,
+  teamCoverageByMission,
 }: {
   rows: ChallengeRow[];
   loaded: boolean;
   onView: (id: string) => void;
+  /** Own institution capability profile, used for the match indicator. */
+  institution?: InstitutionProfile | null;
+  teamCoverageByMission?: Map<string, number>;
 }) {
   const [query, setQuery] = useState("");
   const [priority, setPriority] = useState<string>("ALL");
@@ -187,7 +198,16 @@ export function MissionBoard({
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visible.map((row, i) => (
             <Reveal key={row.id} delay={Math.min(0.05 * i, 0.3)}>
-              <MissionCard row={row} onView={onView} />
+              <MissionCard
+                row={row}
+                onView={onView}
+                institutionMatch={
+                  institution && hasInstitutionData(institution)
+                    ? scoreInstitution(institution, baselineRequirements(row)).percent
+                    : null
+                }
+                teamCoverage={teamCoverageByMission?.get(row.id) ?? null}
+              />
             </Reveal>
           ))}
         </div>

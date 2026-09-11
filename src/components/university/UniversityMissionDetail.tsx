@@ -7,7 +7,9 @@ import { statusMap, type ChallengeRow } from "@/lib/challenges-service";
 import { getChallengeById } from "@/lib/challenges-service";
 import { categoryLabel } from "@/lib/university-data";
 import { TeamFormationModal } from "./TeamFormationModal";
+import { InstitutionMatches } from "./InstitutionMatches";
 import { useAssistantFocus } from "@/lib/assistant-context";
+import { useAuth } from "@/lib/auth-context";
 
 /** The same MapLibre map the citizen dashboard uses. */
 const ChallengeMap = lazy(() => import("@/components/citizen/ChallengeMap"));
@@ -32,6 +34,7 @@ export function UniversityMissionDetail({
   onViewTeam?: (teamId: string) => void;
 }) {
   const reduced = useReducedMotion() ?? false;
+  const { currentProfile } = useAuth();
   const [row, setRow] = useState<ChallengeRow | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [teamOpen, setTeamOpen] = useState(false);
@@ -251,6 +254,11 @@ export function UniversityMissionDetail({
                         </p>
                       )}
                     </div>
+
+                    <InstitutionMatches
+                      challengeId={row.id}
+                      ownProfileId={currentProfile?.id ?? null}
+                    />
 
                     <motion.button
                       type="button"

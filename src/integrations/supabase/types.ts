@@ -328,61 +328,85 @@ export type Database = {
       }
       profiles: {
         Row: {
+          academic_disciplines: string[] | null
           bio: string | null
+          civic_domains: string[] | null
           course: string | null
           created_at: string
           department: string | null
+          district: string | null
           email: string | null
           expertise_areas: string[] | null
+          faculty_expertise: string[] | null
           id: string
           industry_domain: string | null
+          innovation_facilities: string[] | null
           institution: string | null
           jurisdiction: string | null
+          lab_capabilities: string[] | null
           name: string | null
           organization_type: string | null
+          research_areas: string[] | null
           role: string
           skills: string[] | null
           support_capabilities: string[] | null
+          tech_capabilities: string[] | null
           technologies: string[] | null
           website: string | null
           year: string | null
         }
         Insert: {
+          academic_disciplines?: string[] | null
           bio?: string | null
+          civic_domains?: string[] | null
           course?: string | null
           created_at?: string
           department?: string | null
+          district?: string | null
           email?: string | null
           expertise_areas?: string[] | null
+          faculty_expertise?: string[] | null
           id: string
           industry_domain?: string | null
+          innovation_facilities?: string[] | null
           institution?: string | null
           jurisdiction?: string | null
+          lab_capabilities?: string[] | null
           name?: string | null
           organization_type?: string | null
+          research_areas?: string[] | null
           role?: string
           skills?: string[] | null
           support_capabilities?: string[] | null
+          tech_capabilities?: string[] | null
           technologies?: string[] | null
           website?: string | null
           year?: string | null
         }
         Update: {
+          academic_disciplines?: string[] | null
           bio?: string | null
+          civic_domains?: string[] | null
           course?: string | null
           created_at?: string
           department?: string | null
+          district?: string | null
           email?: string | null
           expertise_areas?: string[] | null
+          faculty_expertise?: string[] | null
           id?: string
           industry_domain?: string | null
+          innovation_facilities?: string[] | null
           institution?: string | null
           jurisdiction?: string | null
+          lab_capabilities?: string[] | null
           name?: string | null
           organization_type?: string | null
+          research_areas?: string[] | null
           role?: string
           skills?: string[] | null
           support_capabilities?: string[] | null
+          tech_capabilities?: string[] | null
           technologies?: string[] | null
           website?: string | null
           year?: string | null
