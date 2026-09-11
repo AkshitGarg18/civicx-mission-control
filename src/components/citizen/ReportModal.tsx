@@ -1,28 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   ArrowLeft,
   ArrowRight,
-  Crosshair,
   FileText,
   Film,
   Image as ImageIcon,
-  MapPin,
-  Search,
   Send,
   Trash2,
   UploadCloud,
   X,
 } from "lucide-react";
 import {
-  currentLocation,
-  mockLocations,
   reportCategories,
   reportCategoryAccent,
   type AiAnalysisResult,
-  type MockLocation,
   type ReportCategory,
 } from "@/lib/citizen-data";
+import { formatCoords, type SelectedLocation } from "@/lib/location";
+import { LocationPicker } from "./LocationPicker";
+
 import { AiAnalysis } from "./AiAnalysis";
 import {
   createChallenge,
@@ -61,7 +58,7 @@ export interface ReportDraft {
   title: string;
   description: string;
   category: ReportCategory | null;
-  location: MockLocation | null;
+  location: SelectedLocation | null;
   evidence: Evidence[];
 }
 
@@ -79,13 +76,6 @@ function kindFor(file: File): Evidence["kind"] {
   return "document";
 }
 
-/** "28.7495° N" -> 28.7495 (negative for S/W). */
-function parseCoord(raw?: string): number | null {
-  if (!raw) return null;
-  const value = Number.parseFloat(raw);
-  if (Number.isNaN(value)) return null;
-  return /[SW]/i.test(raw) ? -value : value;
-}
 
 
 const kindIcon = { photo: ImageIcon, video: Film, document: FileText } as const;
@@ -103,7 +93,7 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
 
 
   const [draft, setDraft] = useState<ReportDraft>(emptyDraft);
-  const [query, setQuery] = useState("");
+  
   const [dragging, setDragging] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -124,7 +114,6 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
     setStep(0);
     setPhase("form");
     setDraft(emptyDraft);
-    setQuery("");
     setError(null);
     setReceived(false);
     setAnalysis(null);
@@ -156,15 +145,6 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
     setTimeout(reset, 350);
   };
 
-  const results = useMemo(
-    () =>
-      query.trim().length === 0
-        ? mockLocations
-        : mockLocations.filter((l) =>
-            `${l.label} ${l.area}`.toLowerCase().includes(query.trim().toLowerCase()),
-          ),
-    [query],
-  );
 
   const canAdvance =
     step === 0
@@ -192,9 +172,8 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
       return "Describe the problem in at least 10 characters.";
     if (!draft.category) return "Choose a category for this challenge.";
     if (!draft.location) return "Select the location where this is happening.";
-    const lat = parseCoord(draft.location.lat);
-    const lng = parseCoord(draft.location.lng);
-    if (lat === null || lng === null || Math.abs(lat) > 90 || Math.abs(lng) > 180)
+    const { latitude: lat, longitude: lng } = draft.location;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180)
       return "The selected location has invalid coordinates.";
     return null;
   };
@@ -216,8 +195,13 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
         description: draft.description.trim(),
         category: draft.category,
         locationName: draft.location?.label ?? null,
-        latitude: parseCoord(draft.location?.lat),
-        longitude: parseCoord(draft.location?.lng),
+        latitude: draft.location?.latitude ?? null,
+        longitude: draft.location?.longitude ?? null,
+        address: draft.location?.address ?? null,
+        locality: draft.location?.locality ?? null,
+        city: draft.location?.city ?? null,
+        state: draft.location?.state ?? null,
+        country: draft.location?.country ?? null,
       });
 
       if (draft.evidence.length > 0) {
@@ -398,78 +382,13 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                       )}
 
                       {step === 1 && (
-                        <div className="space-y-5">
-                          <div className="glass-soft flex items-center gap-3 rounded-xl px-3 py-2.5">
-                            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-                            <input
-                              value={query}
-                              onChange={(e) => setQuery(e.target.value)}
-                              placeholder="Search a location…"
-                              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setDraft((d) => ({ ...d, location: currentLocation }));
-                                setQuery("");
-                              }}
-                              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-cyan/30 bg-cyan/10 px-2.5 py-1.5 font-mono text-[10px] tracking-[0.14em] text-cyan"
-                            >
-                              <Crosshair className="h-3.5 w-3.5" />
-                              CURRENT
-                            </button>
-                          </div>
-
-                          <div className="grid gap-2 sm:grid-cols-2">
-                            {results.map((l) => {
-                              const active = draft.location?.label === l.label;
-                              return (
-                                <button
-                                  key={l.label}
-                                  type="button"
-                                  onClick={() => setDraft((d) => ({ ...d, location: l }))}
-                                  className={cn(
-                                    "flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors",
-                                    active
-                                      ? "border-cyan/40 bg-cyan/10"
-                                      : "border-border hover:border-cyan/30",
-                                  )}
-                                >
-                                  <MapPin className={cn("h-4 w-4 shrink-0", active ? "text-cyan" : "text-muted-foreground")} />
-                                  <span className="min-w-0">
-                                    <span className="block truncate font-mono text-[11px] tracking-[0.14em]">
-                                      {l.label}
-                                    </span>
-                                    <span className="block truncate text-xs text-muted-foreground">{l.area}</span>
-                                  </span>
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                          <div className="grid-floor glass-soft relative overflow-hidden rounded-xl p-5">
-                            <span
-                              className="pointer-events-none absolute inset-0 opacity-40"
-                              style={{ backgroundImage: "var(--gradient-hero)" }}
-                            />
-                            <div className="relative flex items-center justify-between gap-4">
-                              <div>
-                                <p className="mono-label text-cyan/90">SELECTED COORDINATES</p>
-                                <p className="mt-2 font-mono text-sm tracking-[0.18em]">
-                                  {draft.location?.label ?? "AWAITING SELECTION"}
-                                </p>
-                                <p className="mt-1 font-mono text-xs text-muted-foreground">
-                                  {draft.location ? `${draft.location.lat}  ${draft.location.lng}` : "—"}
-                                </p>
-                              </div>
-                              <span className="relative flex h-10 w-10 items-center justify-center">
-                                <span className="absolute h-10 w-10 rounded-full border border-cyan/30 motion-safe:animate-ping" />
-                                <span className="h-2 w-2 rounded-full bg-cyan shadow-[0_0_12px_var(--neon-cyan)]" />
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                        <LocationPicker
+                          value={draft.location}
+                          onChange={(location) => setDraft((d) => ({ ...d, location }))}
+                          onConfirm={() => draft.location && setStep(2)}
+                        />
                       )}
+
 
                       {step === 2 && (
                         <div className="space-y-4">
@@ -557,7 +476,7 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                             label="LOCATION"
                             value={
                               draft.location
-                                ? `${draft.location.label} · ${draft.location.lat} ${draft.location.lng}`
+                                ? `${draft.location.label} · ${formatCoords(draft.location.latitude, draft.location.longitude)}`
                                 : "—"
                             }
                           />

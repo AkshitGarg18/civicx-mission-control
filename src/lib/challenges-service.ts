@@ -51,6 +51,11 @@ export interface NewChallenge {
   locationName: string | null;
   latitude: number | null;
   longitude: number | null;
+  address?: string | null;
+  locality?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
 }
 
 /** Insert a challenge plus its first status-history entry. */
@@ -67,11 +72,17 @@ export async function createChallenge(input: NewChallenge): Promise<ChallengeRow
       location_name: input.locationName,
       latitude: input.latitude,
       longitude: input.longitude,
+      address: input.address ?? null,
+      locality: input.locality ?? null,
+      city: input.city ?? null,
+      state: input.state ?? null,
+      country: input.country ?? null,
       priority: "MEDIUM",
       status: "REPORTED",
     })
     .select()
     .single();
+
 
   if (error) throw error;
 

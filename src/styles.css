@@ -549,3 +549,30 @@
 @media (prefers-reduced-motion: reduce) {
   .civicx-marker-halo, .civicx-marker-radar { animation: none !important; }
 }
+
+/* draggable civic-report pin used by the report location picker */
+.civicx-pin {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 1.75rem;
+  width: 1.75rem;
+  cursor: grab;
+}
+.civicx-pin:active { cursor: grabbing; }
+.civicx-pin-halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--neon-cyan) 55%, transparent);
+  background: color-mix(in oklab, var(--neon-cyan) 12%, transparent);
+}
+.civicx-pin-core {
+  height: 0.65rem;
+  width: 0.65rem;
+  border-radius: 999px;
+  background: var(--neon-cyan);
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, var(--neon-cyan) 22%, transparent),
+    0 0 16px color-mix(in oklab, var(--neon-cyan) 70%, transparent);
+}
