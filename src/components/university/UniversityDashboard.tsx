@@ -7,6 +7,8 @@ import {
   type ChallengeRow,
 } from "@/lib/challenges-service";
 import { getMyTeams, type TeamWithMembers } from "@/lib/teams-service";
+import { getMyInstitution } from "@/lib/institution-service";
+import type { InstitutionProfile } from "@/lib/institution-matching";
 import { useAuth } from "@/lib/auth-context";
 import {
   getMyProposals,
@@ -44,6 +46,7 @@ export function UniversityDashboard() {
   const [collabStatuses, setCollabStatuses] = useState<Map<string, string>>(new Map());
   const { currentUser, currentProfile, loading } = useAuth();
   const [skippedSetup, setSkippedSetup] = useState(false);
+  const [institution, setInstitution] = useState<InstitutionProfile | null>(null);
 
 
   const load = useCallback(async () => {
@@ -94,6 +97,22 @@ export function UniversityDashboard() {
     void loadProposals();
   }, [load, loadTeams, loadProposals]);
 
+  /** Own institution capability profile, for the mission card indicator. */
+  useEffect(() => {
+    if (!currentUser) {
+      setInstitution(null);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const own = await getMyInstitution(currentUser.id);
+      if (!cancelled) setInstitution(own);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser]);
+
   /** Stay current when a new signal lands, without recreating state. */
   useEffect(() => {
     const refresh = () => void load();
@@ -117,6 +136,13 @@ export function UniversityDashboard() {
   const proposalStatuses = new Map(
     [...proposalByTeam].map(([teamId, p]) => [teamId, p.status] as const),
   );
+
+  /** mission id -> stored skill coverage of the team formed for it. */
+  const coverageByMission = new Map<string, number>();
+  for (const entry of teams) {
+    const value = entry.team.skill_coverage;
+    if (typeof value === "number") coverageByMission.set(entry.team.mission_id, value);
+  }
 
   const openTeam = teams.find((t) => t.team.id === openTeamId) ?? null;
   const proposalTeam = teams.find((t) => t.team.id === proposalTeamId) ?? null;
@@ -159,7 +185,13 @@ export function UniversityDashboard() {
             {active === "mission-board" && (
               <>
                 <UniversityStats rows={rows} loaded={loaded} teams={teams} />
-                <MissionBoard rows={rows} loaded={loaded} onView={setDetailId} />
+                <MissionBoard
+                  rows={rows}
+                  loaded={loaded}
+                  onView={setDetailId}
+                  institution={institution}
+                  teamCoverageByMission={coverageByMission}
+                />
               </>
             )}
 
