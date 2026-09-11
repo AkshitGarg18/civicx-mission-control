@@ -86,15 +86,35 @@ const clean = (list: (string | null | undefined)[]): string[] => {
 
 const norm = (s: string) => s.trim().toLowerCase();
 
-/** Same tolerant comparison the student skill matcher uses. */
+/**
+ * Words that carry no subject meaning on their own. Without this list
+ * "Waste Management" would match "Water Management" on the shared word
+ * "management", which would inflate scores across unrelated domains.
+ */
+const GENERIC_TOKENS = new Set([
+  "management", "engineering", "science", "sciences", "studies", "technology",
+  "technologies", "system", "systems", "design", "assessment", "analysis",
+  "analytics", "planning", "operations", "coordination", "services", "support",
+  "research", "lab", "laboratory", "development", "applied", "general",
+  "programme", "program", "solutions", "monitoring", "centre", "center",
+]);
+
+const meaningfulTokens = (value: string): Set<string> =>
+  new Set(
+    value
+      .split(/[^a-z0-9]+/)
+      .filter((t) => t.length > 3 && !GENERIC_TOKENS.has(t)),
+  );
+
+/** Tolerant label comparison, in the spirit of the student skill matcher. */
 function sameLabel(a: string, b: string): boolean {
   const x = norm(a);
   const y = norm(b);
   if (x === y) return true;
-  if (x.length >= 4 && y.length >= 4 && (x.includes(y) || y.includes(x))) return true;
-  // token overlap for multi-word labels ("urban water supply" vs "water supply")
-  const ax = new Set(x.split(/[^a-z0-9]+/).filter((t) => t.length > 3));
-  const by = new Set(y.split(/[^a-z0-9]+/).filter((t) => t.length > 3));
+  if (x.length >= 5 && y.length >= 5 && (x.includes(y) || y.includes(x))) return true;
+  // subject-word overlap for multi-word labels ("urban water supply" vs "water supply")
+  const ax = meaningfulTokens(x);
+  const by = meaningfulTokens(y);
   if (ax.size === 0 || by.size === 0) return false;
   for (const t of ax) if (by.has(t)) return true;
   return false;
