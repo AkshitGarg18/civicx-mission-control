@@ -57,7 +57,15 @@ export function MissionCard({
       <span className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-azure/20 opacity-25 blur-2xl transition-opacity duration-500 group-hover:opacity-50" />
 
       <div className="relative flex items-start justify-between gap-3">
-        <PriorityChip priority={priority} />
+        <div className="flex flex-wrap items-center gap-2">
+          <PriorityChip priority={priority} />
+          {(row.report_count ?? 1) > 1 && (
+            <span className="inline-flex items-center gap-1 rounded-md border border-cyan/40 bg-cyan/10 px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] text-cyan">
+              <Users className="h-3 w-3" />
+              {row.report_count} CITIZEN REPORTS
+            </span>
+          )}
+        </div>
         <StatusChip status={status} />
       </div>
 

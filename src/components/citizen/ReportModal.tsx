@@ -29,6 +29,7 @@ import {
 } from "@/lib/challenges-service";
 import { useServerFn } from "@tanstack/react-start";
 import { analyzeChallenge } from "@/lib/analysis.functions";
+import { detectDuplicates, type DuplicateMatch } from "@/lib/duplicates.functions";
 import { toAnalysisResult } from "@/lib/analysis-result";
 
 import { cn } from "@/lib/utils";
@@ -89,7 +90,9 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
   const [analysis, setAnalysis] = useState<AiAnalysisResult | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [challengeId, setChallengeId] = useState<string | null>(null);
+  const [duplicates, setDuplicates] = useState<DuplicateMatch[]>([]);
   const runAnalysis = useServerFn(analyzeChallenge);
+  const runDuplicateCheck = useServerFn(detectDuplicates);
 
 
   const [draft, setDraft] = useState<ReportDraft>(emptyDraft);
@@ -119,16 +122,32 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
     setAnalysis(null);
     setAnalysisError(null);
     setChallengeId(null);
+    setDuplicates([]);
+  };
+
+  /**
+   * Advisory duplicate check. Runs after the report is already stored, so a
+   * failure here can never block or reject the citizen's submission.
+   */
+  const checkDuplicates = async (id: string) => {
+    try {
+      setDuplicates(await runDuplicateCheck({ data: { challengeId: id } }));
+    } catch (err) {
+      console.error("[civicx] duplicate detection unavailable", err);
+      setDuplicates([]);
+    }
   };
 
   /** Runs the server-side AI analysis for a stored challenge. */
   const analyse = async (id: string) => {
     setAnalysis(null);
     setAnalysisError(null);
+    setDuplicates([]);
     try {
       const result = await runAnalysis({ data: { challengeId: id } });
       setAnalysis(toAnalysisResult(result, id));
       window.dispatchEvent(new Event(CHALLENGE_CREATED_EVENT));
+      void checkDuplicates(id);
     } catch (err) {
       console.error("[civicx] ai analysis failed", err);
       setAnalysisError(
@@ -627,6 +646,7 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
                     {...(analysisError ? { error: analysisError } : {})}
                     {...(challengeId ? { onRetry: () => void analyse(challengeId) } : {})}
                     challengeId={challengeId}
+                    duplicates={duplicates}
                     onCreateMission={finish}
 
                   />

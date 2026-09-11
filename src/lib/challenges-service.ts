@@ -345,10 +345,14 @@ export function toChallengeNode(row: ChallengeRow, index = 0): ChallengeNode {
   };
 }
 
-/** Challenges with usable coordinates, ready for the map. */
+/**
+ * Challenges with usable coordinates, ready for the map.
+ * Reports linked to a canonical challenge are collapsed into that single pin,
+ * so one underlying problem never shows up as a cluster of duplicates.
+ */
 export async function getMapChallenges(): Promise<ChallengeRow[]> {
   const rows = await getChallenges();
-  return rows.filter(hasCoordinates);
+  return rows.filter((row) => hasCoordinates(row) && !row.canonical_challenge_id);
 }
 
 /**

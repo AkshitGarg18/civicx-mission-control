@@ -60,6 +60,9 @@ export function MissionBoard({
     const statusEntry = statusFilters.find((s) => s.id === status);
 
     const filtered = rows.filter((row) => {
+      // supporting reports live behind their canonical challenge, not as
+      // separate missions
+      if (row.canonical_challenge_id) return false;
       if (q) {
         const haystack = [row.title, row.location_name ?? "", row.category ?? ""]
           .join(" ")
