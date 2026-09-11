@@ -5,6 +5,11 @@ import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { roleById } from "@/lib/civicx-roles";
 import { updateMyProfile } from "@/lib/profile-service";
+import {
+  getMyInstitution,
+  parseList,
+  updateMyInstitution,
+} from "@/lib/institution-service";
 import { SkillPicker } from "@/components/university/SkillPicker";
 
 
@@ -73,6 +78,14 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
   const [year, setYear] = useState("");
   const [bio, setBio] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
+  const [district, setDistrict] = useState("");
+  const [disciplines, setDisciplines] = useState("");
+  const [research, setResearch] = useState("");
+  const [faculty, setFaculty] = useState("");
+  const [labs, setLabs] = useState("");
+  const [innovation, setInnovation] = useState("");
+  const [techCaps, setTechCaps] = useState("");
+  const [civicDomains, setCivicDomains] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +99,27 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
     setBio(currentProfile.bio ?? "");
     setSkills(currentProfile.skills ?? []);
   }, [currentProfile]);
+
+  /** Institution-level capabilities live on the same profile row. */
+  useEffect(() => {
+    if (!currentUser || role !== "university") return;
+    let cancelled = false;
+    void (async () => {
+      const own = await getMyInstitution(currentUser.id);
+      if (!own || cancelled) return;
+      setDistrict(own.district ?? "");
+      setDisciplines(own.academicDisciplines.join(", "));
+      setResearch(own.researchAreas.join(", "));
+      setFaculty(own.facultyExpertise.join(", "));
+      setLabs(own.labCapabilities.join(", "));
+      setInnovation(own.innovationFacilities.join(", "));
+      setTechCaps(own.techCapabilities.join(", "));
+      setCivicDomains(own.civicDomains.join(", "));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser, role]);
 
   const save = async () => {
     if (!currentUser) return;
