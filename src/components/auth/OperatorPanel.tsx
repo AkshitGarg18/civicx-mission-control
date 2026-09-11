@@ -135,6 +135,18 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
         bio: bio.trim() || null,
         skills,
       });
+      if (role === "university") {
+        await updateMyInstitution(currentUser.id, {
+          district: district.trim() || null,
+          academicDisciplines: parseList(disciplines),
+          researchAreas: parseList(research),
+          facultyExpertise: parseList(faculty),
+          labCapabilities: parseList(labs),
+          innovationFacilities: parseList(innovation),
+          techCapabilities: parseList(techCaps),
+          civicDomains: parseList(civicDomains),
+        });
+      }
       await refreshProfile();
       setMessage("PROFILE SYNCHRONISED");
     } catch (err) {
@@ -226,6 +238,65 @@ export function OperatorPanel({ view }: { view: "profile" | "settings" }) {
                 </div>
               </div>
 
+              {role === "university" && (
+                <>
+                  <div className="border-t border-border pt-5">
+                    <p className="mono-label text-azure">INSTITUTION CAPABILITY PROFILE</p>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Used to match your institution to civic missions. Separate entries
+                      with commas. Only university accounts can see these details.
+                    </p>
+                  </div>
+                  <Field
+                    label="DISTRICT / CITY"
+                    value={district}
+                    onChange={setDistrict}
+                    placeholder="e.g. Delhi"
+                  />
+                  <Field
+                    label="ACADEMIC DISCIPLINES"
+                    value={disciplines}
+                    onChange={setDisciplines}
+                    placeholder="e.g. Civil Engineering, Computer Science, Environmental Engineering"
+                  />
+                  <Field
+                    label="RESEARCH AREAS"
+                    value={research}
+                    onChange={setResearch}
+                    placeholder="e.g. Water management, Air quality monitoring"
+                  />
+                  <Field
+                    label="FACULTY EXPERTISE"
+                    value={faculty}
+                    onChange={setFaculty}
+                    placeholder="e.g. Urban infrastructure, Remote sensing"
+                  />
+                  <Field
+                    label="LABORATORY CAPABILITIES"
+                    value={labs}
+                    onChange={setLabs}
+                    placeholder="e.g. GIS lab, Water testing lab, IoT lab"
+                  />
+                  <Field
+                    label="INNOVATION / INCUBATION FACILITIES"
+                    value={innovation}
+                    onChange={setInnovation}
+                    placeholder="e.g. Startup incubation centre, Prototyping workshop"
+                  />
+                  <Field
+                    label="TECHNOLOGY CAPABILITIES"
+                    value={techCaps}
+                    onChange={setTechCaps}
+                    placeholder="e.g. GIS, IoT, AI/ML, Data analytics"
+                  />
+                  <Field
+                    label="SUPPORTED CIVIC DOMAINS"
+                    value={civicDomains}
+                    onChange={setCivicDomains}
+                    placeholder="e.g. Water Management, Waste Management, Urban Mobility"
+                  />
+                </>
+              )}
             </div>
 
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
