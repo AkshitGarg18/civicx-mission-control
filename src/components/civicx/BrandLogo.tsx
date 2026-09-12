@@ -1,4 +1,3 @@
-import logoAsset from "@/assets/civicx-logo.png.asset.json";
 import { cn } from "@/lib/utils";
 
 export function BrandLogo({
@@ -10,10 +9,10 @@ export function BrandLogo({
 }) {
   return (
     <img
-      src={logoAsset.url}
+      src="/logo.png"
       alt="CivicX"
-      width={1295}
-      height={595}
+      width={1536}
+      height={1024}
       loading={eager ? "eager" : "lazy"}
       decoding="async"
       className={cn("block h-auto object-contain", className)}
