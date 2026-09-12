@@ -1,7 +1,8 @@
 import { motion, useReducedMotion } from "motion/react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Hexagon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
+import { BrandLogo } from "@/components/civicx/BrandLogo";
 
 /**
  * Shared frame for the /login and /signup screens: CivicX chrome, a subtle
@@ -34,13 +35,10 @@ export function AuthShell({
       />
 
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4">
-        <Link to="/" className="flex items-center gap-2.5">
-          <span className="relative grid h-8 w-8 shrink-0 place-items-center">
-            <Hexagon className="h-full w-full text-cyan/70" strokeWidth={1.2} />
-            <span className="absolute h-2 w-2 rounded-full bg-cyan shadow-[0_0_12px_var(--neon-cyan)]" />
-          </span>
+        <Link to="/" aria-label="CivicX home" className="flex min-w-0 items-center gap-3">
+          <BrandLogo eager className="h-9 w-auto shrink-0 object-left sm:h-11" />
           <span className="font-mono text-[11px] tracking-[0.28em] text-muted-foreground">
-            CIVICX <span className="text-cyan">//</span> {label}
+            <span className="text-cyan">//</span> {label}
           </span>
         </Link>
         <Link
@@ -85,6 +83,7 @@ export function AuthShell({
           )}
 
           <div className="relative">
+            <BrandLogo eager className="mx-auto mb-7 h-auto w-48 max-w-[72%] sm:w-56" />
             <h1 className="font-mono text-lg tracking-[0.22em] text-foreground sm:text-xl">
               {heading}
             </h1>

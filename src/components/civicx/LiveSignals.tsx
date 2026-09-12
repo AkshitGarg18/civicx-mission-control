@@ -26,10 +26,11 @@ const tone: Record<string, string> = {
 export function LiveSignals() {
   const reduced = useReducedMotion();
   const [items, setItems] = useState<FeedItem[]>(() =>
-    signalFeed.slice(0, 5).map((s, i) => ({ ...s, key: i, time: clock(i * 47) })),
+    signalFeed.slice(0, 5).map((s, i) => ({ ...s, key: i, time: "--:--:--" })),
   );
 
   useEffect(() => {
+    setItems((current) => current.map((item, i) => ({ ...item, time: clock(i * 47) })));
     if (reduced) return;
     let n = signalFeed.length;
     const id = window.setInterval(() => {

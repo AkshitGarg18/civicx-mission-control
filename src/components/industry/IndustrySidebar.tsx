@@ -5,6 +5,7 @@ import { ArrowLeft, Menu, X } from "lucide-react";
 import { industryNav } from "@/lib/industry-data";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/civicx/BrandLogo";
 
 function NavList({
   active,
@@ -91,16 +92,8 @@ function SidebarFooter({ onNavigate }: { onNavigate?: ((id: string) => void) | u
 
 function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-2.5">
-      <span
-        className="grid h-8 w-8 place-items-center rounded-lg font-mono text-xs font-semibold text-background"
-        style={{ backgroundImage: "var(--gradient-accent)" }}
-      >
-        CX
-      </span>
-      <span className="text-base font-semibold tracking-tight">
-        Civic<span className="text-cyan">X</span>
-      </span>
+    <Link to="/" aria-label="CivicX home" className="flex min-w-0 items-center">
+      <BrandLogo eager className="h-11 w-auto max-w-full object-left" />
     </Link>
   );
 }
