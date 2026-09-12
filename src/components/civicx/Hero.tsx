@@ -5,6 +5,7 @@ import { heroLinks, heroNodes, type ChallengeNode } from "@/lib/civicx-data";
 import { NodeNetwork } from "./NodeNetwork";
 import { ChallengePanel } from "./ChallengePanel";
 import { Counter } from "./Counter";
+import { BrandLogo } from "./BrandLogo";
 
 export function Hero() {
   const reduced = useReducedMotion();
@@ -17,6 +18,13 @@ export function Hero() {
     <section id="top" className="relative px-4 pb-16 pt-32 sm:px-6 sm:pt-40 lg:pb-28">
       <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-10">
         <motion.div style={{ y: copyY }} className="min-w-0">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <BrandLogo eager className="mb-7 h-auto w-56 max-w-[72vw] object-left sm:w-72" />
+          </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}

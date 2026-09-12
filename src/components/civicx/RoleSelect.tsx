@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Hexagon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { networkStatus, roleById, roles, type RoleDefinition } from "@/lib/civicx-roles";
 import { supabase } from "@/integrations/supabase/client";
 import { Counter } from "./Counter";
 import { RoleCard } from "./RoleCard";
+import { BrandLogo } from "./BrandLogo";
 
 /** Full-screen platform access experience: pick a mission role, then enter. */
 export function RoleSelect() {
@@ -68,13 +69,10 @@ export function RoleSelect() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <Link to="/" className="flex items-center gap-2.5">
-          <span className="relative grid h-8 w-8 shrink-0 place-items-center">
-            <Hexagon className="h-full w-full text-cyan/70" strokeWidth={1.2} />
-            <span className="absolute h-2 w-2 rounded-full bg-cyan shadow-[0_0_12px_var(--neon-cyan)]" />
-          </span>
+        <Link to="/" aria-label="CivicX home" className="flex min-w-0 items-center gap-3">
+          <BrandLogo eager className="h-9 w-auto shrink-0 object-left sm:h-11" />
           <span className="font-mono text-[11px] tracking-[0.28em] text-muted-foreground">
-            CIVICX <span className="text-cyan">//</span> PLATFORM ACCESS
+            <span className="text-cyan">//</span> PLATFORM ACCESS
           </span>
         </Link>
         <Link

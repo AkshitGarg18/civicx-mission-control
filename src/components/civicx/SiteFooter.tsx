@@ -1,4 +1,4 @@
-import { Hexagon } from "lucide-react";
+import { BrandLogo } from "./BrandLogo";
 
 const links = ["About", "Challenges", "Universities", "Industry", "Government", "Contact"];
 
@@ -7,15 +7,7 @@ export function SiteFooter() {
     <footer className="relative border-t border-border/70 px-4 py-12 sm:px-6">
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div className="min-w-0">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <span className="relative grid h-8 w-8 shrink-0 place-items-center">
-              <Hexagon className="h-8 w-8 text-cyan/70" strokeWidth={1.2} />
-              <span className="absolute h-1.5 w-1.5 rounded-full bg-cyan shadow-[0_0_10px_var(--neon-cyan)]" />
-            </span>
-            <span className="truncate font-display text-base font-semibold">
-              Civic<span className="text-gradient">X</span>
-            </span>
-          </div>
+          <BrandLogo className="h-11 w-auto object-left" />
           <p className="mt-3 text-sm text-muted-foreground">
             Technology for measurable societal impact.
           </p>

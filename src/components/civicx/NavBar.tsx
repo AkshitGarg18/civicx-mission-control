@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X, Hexagon } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "./BrandLogo";
 
 const links = [
   { label: "Explore Challenges", href: "#live-world" },
@@ -59,19 +60,14 @@ export function NavBar() {
           open && "bg-background/95",
         )}
       >
-        <a href="#top" className="flex min-w-0 items-center gap-2.5">
-          <span
+        <a href="#top" aria-label="CivicX home" className="flex min-w-0 items-center">
+          <BrandLogo
+            eager
             className={cn(
-              "relative grid shrink-0 place-items-center transition-all duration-500",
-              scrolled ? "h-8 w-8" : "h-9 w-9",
+              "w-auto object-left transition-all duration-500",
+              scrolled ? "h-9 sm:h-10" : "h-10 sm:h-12",
             )}
-          >
-            <Hexagon className="h-full w-full text-cyan/70" strokeWidth={1.2} />
-            <span className="absolute h-2 w-2 rounded-full bg-cyan shadow-[0_0_12px_var(--neon-cyan)]" />
-          </span>
-          <span className="truncate font-display text-lg font-semibold tracking-tight">
-            Civic<span className="text-gradient">X</span>
-          </span>
+          />
         </a>
 
         <div className="hidden items-center gap-1 lg:flex">
