@@ -27,8 +27,6 @@ import {
 } from "@/lib/institution-matching";
 import { toInstitutionProfile } from "@/lib/institution-service";
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
 const MAX_EXPLAINED = 5;
 
 export interface InstitutionMatch {
