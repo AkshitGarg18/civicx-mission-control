@@ -7,6 +7,7 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { callGemini } from "@/lib/ai-gateway.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -193,42 +194,11 @@ Threat assessment rules (safety critical):
 
 
 async function callModel(prompt: string): Promise<string> {
-  const apiKey = process.env["LOVABLE_API_KEY"];
-  if (!apiKey) {
-    console.error("[civicx] LOVABLE_API_KEY is not configured");
+  try {
+    return await callGemini({ feature: "analysis", system: SYSTEM_PROMPT, prompt });
+  } catch {
     throw new AnalysisUnavailableError();
   }
-
-  const response = await fetch(GATEWAY_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: prompt },
-      ],
-    }),
-  });
-
-  if (!response.ok) {
-    const detail = await response.text();
-    console.error(`[civicx] AI request failed [${response.status}]: ${detail}`);
-    throw new AnalysisUnavailableError();
-  }
-
-  const payload = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const content = payload.choices?.[0]?.message?.content;
-  if (!content) {
-    console.error("[civicx] AI response contained no content", JSON.stringify(payload));
-    throw new AnalysisUnavailableError();
-  }
-  return content;
 }
 
 /**

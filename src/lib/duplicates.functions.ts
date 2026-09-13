@@ -11,6 +11,7 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { callGemini } from "@/lib/ai-gateway.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -105,30 +106,11 @@ Rules:
 - Include exactly one object per candidate, using the candidate_id given.`;
 
 async function classify(prompt: string): Promise<unknown> {
-  const apiKey = process.env["LOVABLE_API_KEY"];
-  if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
-
-  const response = await fetch(GATEWAY_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: prompt },
-      ],
-    }),
+  const content = await callGemini({
+    feature: "duplicates",
+    system: SYSTEM_PROMPT,
+    prompt,
   });
-
-  if (!response.ok) {
-    throw new Error(`AI request failed [${response.status}]: ${await response.text()}`);
-  }
-
-  const payload = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const content = payload.choices?.[0]?.message?.content;
-  if (!content) throw new Error("AI response contained no content");
 
   const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/);
   const body = (fenced?.[1] ?? content).trim();
