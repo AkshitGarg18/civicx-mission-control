@@ -8,10 +8,9 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { callGemini } from "@/lib/ai-gateway.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
 
 const MAX_TURNS = 12;
 const MAX_CHARS = 2000;
@@ -257,12 +256,6 @@ export const askCivicxAi = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) {
-      console.error("[civicx] LOVABLE_API_KEY is not configured");
-      throw new AssistantUnavailableError();
-    }
-
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -272,38 +265,19 @@ export const askCivicxAi = createServerFn({ method: "POST" })
     const role = clean(profile?.role) || "citizen";
     const contextBlock = await buildContext(supabase as never, data.focus);
 
-    let response: Response;
+    let answer: string;
     try {
-      response = await fetch(GATEWAY_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: [
-            { role: "system", content: systemPrompt(role, contextBlock) },
-            ...data.history,
-            { role: "user", content: data.question },
-          ],
+      answer = clean(
+        await callGemini({
+          feature: "assistant",
+          system: systemPrompt(role, contextBlock),
+          turns: [...data.history, { role: "user", content: data.question }],
         }),
-      });
-    } catch (err) {
-      console.error("[civicx] assistant request failed to send", err);
+      );
+    } catch {
       throw new AssistantUnavailableError();
     }
 
-    if (!response.ok) {
-      const detail = await response.text();
-      console.error(`[civicx] assistant request failed [${response.status}]: ${detail}`);
-      throw new AssistantUnavailableError();
-    }
-
-    const payload = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    const answer = clean(payload.choices?.[0]?.message?.content);
     if (!answer) {
       console.error("[civicx] assistant response had no content");
       throw new AssistantUnavailableError();

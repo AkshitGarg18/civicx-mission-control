@@ -15,6 +15,7 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { callGemini } from "@/lib/ai-gateway.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   baselineRequirements,
@@ -26,8 +27,6 @@ import {
 } from "@/lib/institution-matching";
 import { toInstitutionProfile } from "@/lib/institution-service";
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
 const MAX_EXPLAINED = 5;
 
 export interface InstitutionMatch {
@@ -87,32 +86,7 @@ Rules:
 - Include exactly one object per institution, using the profile_id given.`;
 
 async function callModel(system: string, user: string): Promise<string> {
-  const apiKey = process.env["LOVABLE_API_KEY"];
-  if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
-
-  const response = await fetch(GATEWAY_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-    }),
-  });
-
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(`AI request failed [${response.status}]: ${detail}`);
-  }
-
-  const payload = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const content = payload.choices?.[0]?.message?.content;
-  if (!content) throw new Error("AI response contained no content");
-  return content;
+  return callGemini({ feature: "institution-matching", system, prompt: user });
 }
 
 function extractJson(raw: string, open: "{" | "["): string {
