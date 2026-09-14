@@ -17,8 +17,16 @@ const SUPABASE_URL_FALLBACK = "https://zuivljcbyjckkrqyiznr.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY_FALLBACK =
   "sb_publishable_cBVNA2usrq2H713DbLQBuA_21I9cJSu";
 
-export default defineConfig(({ mode }: { mode: string }) => {
-  const env = loadEnv(mode, process.cwd(), "");
+// Vite sets NODE_ENV=production for builds and development for dev; the
+// lovable defineConfig takes a plain options object, so resolve env eagerly.
+const env = loadEnv(
+  process.env["NODE_ENV"] === "production" ? "production" : "development",
+  process.cwd(),
+  "",
+);
+
+export default defineConfig({
+  {
   const supabaseUrl =
     process.env["VITE_SUPABASE_URL"] ??
     env["VITE_SUPABASE_URL"] ??
