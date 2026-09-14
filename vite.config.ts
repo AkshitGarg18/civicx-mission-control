@@ -20,9 +20,15 @@ const SUPABASE_PUBLISHABLE_KEY_FALLBACK =
 export default defineConfig(({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const supabaseUrl =
-    env.VITE_SUPABASE_URL ?? env.SUPABASE_URL ?? SUPABASE_URL_FALLBACK;
+    process.env.VITE_SUPABASE_URL ??
+    env.VITE_SUPABASE_URL ??
+    process.env.SUPABASE_URL ??
+    env.SUPABASE_URL ??
+    SUPABASE_URL_FALLBACK;
   const supabaseKey =
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
     env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+    process.env.SUPABASE_PUBLISHABLE_KEY ??
     env.SUPABASE_PUBLISHABLE_KEY ??
     SUPABASE_PUBLISHABLE_KEY_FALLBACK;
 
