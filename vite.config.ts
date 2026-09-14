@@ -52,6 +52,11 @@ export default defineConfig({
       "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
       "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY":
         JSON.stringify(supabaseKey),
+      // The generated server auth middleware reads process.env.SUPABASE_URL /
+      // SUPABASE_PUBLISHABLE_KEY at runtime; hosts like Vercel have neither,
+      // which broke every AI server function. Publishable values only.
+      "process.env.SUPABASE_URL": JSON.stringify(supabaseUrl),
+      "process.env.SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabaseKey),
     },
   },
 });
