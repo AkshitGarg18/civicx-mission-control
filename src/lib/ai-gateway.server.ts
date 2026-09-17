@@ -1,7 +1,7 @@
 /**
  * Server-only entry point for every CivicX Gemini call.
  *
- * CivicX has always talked to `google/gemini-2.5-flash`. In the Lovable
+ * CivicX talks to `google/gemini-3.6-flash`. In the Lovable
  * environment it does so through the Lovable AI Gateway, authenticated with the
  * platform-managed `LOVABLE_API_KEY`. That secret only exists inside Lovable
  * hosting, so a deployment to a third-party host (Vercel) has no credential at
@@ -18,8 +18,8 @@
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const GOOGLE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
-const MODEL = "google/gemini-2.5-flash";
-const GOOGLE_MODEL = "gemini-2.5-flash";
+const MODEL = "google/gemini-3.6-flash";
+const GOOGLE_MODEL = "gemini-3.6-flash";
 
 export interface ChatTurn {
   role: "user" | "assistant";
